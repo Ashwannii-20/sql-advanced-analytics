@@ -1,114 +1,109 @@
 # SQL Advanced Analytics
 
-![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-red)
-![Project](https://img.shields.io/badge/Focus-Advanced%20Analytics-blue)
-![Status](https://img.shields.io/badge/Status-Learning%20project-success)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-red)](https://www.microsoft.com/sql-server)
+[![Focus](https://img.shields.io/badge/Focus-Business%20Analytics-blue)](#project-overview)
+[![Repository status](https://img.shields.io/badge/Repository-Documentation%20scaffold-orange)](#current-delivery-status)
 
-A practical **SQL Server (T-SQL) analytics project** built on top of a dimensional data warehouse. It demonstrates how raw business questions can be translated into structured SQL analysis and reusable reporting views.
+A SQL Server analytics portfolio project demonstrating how a dimensional data model can be explored and transformed into business-focused analysis and reusable reporting views.
 
-The project uses the Gold Layer tables from a separate data warehouse project. The focus here is not building the warehouse; it is using trusted, modelled data to discover trends, measure performance, understand customer and product behaviour, and prepare analytical outputs.
+The work covers exploratory data analysis, time-based analysis, cumulative metrics, performance comparisons, contribution analysis, customer/product segmentation, and reporting. It is designed to show not only how SQL statements work, but **why a particular analytical method is appropriate, what each result means, and how its correctness should be checked**.
 
-> **Project boundary:** Data warehouse engineering and analytical consumption are maintained as two separate repositories. See [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) for the upstream warehouse implementation.
+> **Portfolio transparency:** The documentation and folder structure are committed. The original executable SQL scripts, representative query outputs, and run-validation evidence still need to be added. This repository should not be presented as a fully reproducible code sample until those items are committed and tested.
 
----
+## Project overview
 
-## 1. Business purpose
+### Business context
 
-Business data becomes useful when it is converted into evidence that supports decisions. This project applies SQL to answer questions such as:
+A business has sales transactions linked to customer and product dimensions. Decision-makers need consistent answers to questions about revenue, order activity, customer behaviour, product performance, and changes over time.
 
-- Which product categories and products generate the most revenue?
-- How are sales changing month by month and year by year?
-- Which products are performing above or below their historical averages?
-- What share of overall revenue comes from each category?
-- How can customers be grouped using purchasing behaviour?
-- Which customer and product metrics should be exposed in reusable reports?
+This project uses SQL to move from row-level sales data to analytical outputs that can support business review and dashboard development.
 
-The aim is to demonstrate the complete analytical workflow: **explore → measure → compare → explain → segment → report**.
+### Questions explored
 
-## 2. Analytical workflow
+- Which product categories and products contribute the most and least revenue?
+- How do sales, quantities, and order activity change over time?
+- How does current product performance compare with a product's historical average or previous available year?
+- What percentage of total revenue is contributed by each category?
+- How can products be grouped into cost bands?
+- How can customers be grouped using purchasing value and activity lifespan?
+- Which customer and product measures belong in reusable reporting views?
 
-The project is organised into 12 learning topics across two stages.
+### Intended outcome
 
-### Stage 1 — Exploratory Data Analysis (EDA)
+Two reporting outputs form the reporting stage:
 
-| # | Topic | What it investigates |
+- **Customer report:** customer-level sales, order activity, recency, lifespan, age grouping, and customer segmentation.
+- **Product report:** product-level sales, quantity, order/customer counts, recency, and product performance classification.
+
+The views are intended as a consistent SQL layer for further analysis or Power BI consumption. The precise formulas and business thresholds must be confirmed against the committed SQL and documented business rules.
+
+## Analytical workflow
+
+The project is organised into 12 topics in two stages.
+
+### Stage 1 — Exploratory Data Analysis
+
+| # | Topic | Purpose |
 |---:|---|---|
-| 01 | Database Exploration | Tables, schemas, columns, and database structure |
-| 02 | Dimensions Exploration | Descriptive attributes such as country, gender, category, and product |
-| 03 | Date Exploration | Date ranges, order history, and customer age ranges |
-| 04 | Measures Exploration | Core metrics such as revenue, quantity, price, orders, and customers |
-| 05 | Magnitude Analysis | How measures vary across categories, countries, and customers |
-| 06 | Ranking Analysis | Highest- and lowest-performing products, categories, and customers |
+| 01 | Database exploration | Understand schemas, tables, columns, and available data |
+| 02 | Dimensions exploration | Inspect customer and product attributes and their distinct values |
+| 03 | Date exploration | Establish date coverage and understand order/customer date ranges |
+| 04 | Measures exploration | Establish baseline metrics such as sales, quantity, price, orders, and customers |
+| 05 | Magnitude analysis | Compare business measures across categories, countries, and customers |
+| 06 | Ranking analysis | Identify highest- and lowest-performing products, categories, and customers |
 
 ### Stage 2 — Advanced Data Analytics
 
-| # | Topic | What it investigates |
+| # | Topic | Purpose |
 |---:|---|---|
-| 07 | Change-over-Time Analysis | Monthly and yearly trends |
-| 08 | Cumulative Analysis | Running totals and cumulative performance |
-| 09 | Performance Analysis | Current performance compared with averages and previous periods |
-| 10 | Part-to-Whole Analysis | Contribution of a category or segment to the overall total |
-| 11 | Data Segmentation | Grouping products and customers using defined business rules |
-| 12 | Reporting | Reusable customer and product reporting views |
+| 07 | Change-over-time analysis | Evaluate monthly and yearly trends |
+| 08 | Cumulative analysis | Calculate running totals across ordered periods |
+| 09 | Performance analysis | Compare performance with averages and prior available periods |
+| 10 | Part-to-whole analysis | Measure category contribution to an overall total |
+| 11 | Data segmentation | Group products and customers using explicit business rules |
+| 12 | Reporting | Combine calculations into reusable customer and product views |
 
-## 3. How the analysis is structured
+See [Analytics workflow](docs/analytics-workflow.md) for topic-level explanations and [Architecture](docs/architecture.md) for the end-to-end diagram.
 
-The analytical process starts with the Gold Layer fact and dimension tables. SQL then shapes the data into a useful base dataset, applies business logic, aggregates the results, enriches the output with derived metrics, and exposes the result through reporting views.
+## Data model and analytical grain
 
-The detailed architecture diagram is available in [docs/architecture.md](docs/architecture.md).
+The analysis consumes the Gold Layer of a separate dimensional warehouse project:
 
-## 4. Data model used
-
-The project analyses a simple star-schema-style model:
-
-| Table | Role | Typical contents |
+| Entity | Role | Analytical purpose |
 |---|---|---|
-| `gold.fact_sales` | Fact table | Sales transactions, order dates, quantities, sales amounts, customer and product keys |
-| `gold.dim_customers` | Dimension table | Customer identifiers and descriptive attributes |
-| `gold.dim_products` | Dimension table | Product identifiers, names, categories, subcategories, and costs |
+| Sales fact table | Fact | Sales events and numeric measures such as sales amount and quantity |
+| Customer dimension | Dimension | Customer attributes used for grouping and filtering |
+| Product dimension | Dimension | Product name, category, subcategory, and cost attributes |
 
-The fact table contains measurable business events. Dimension tables provide the descriptive context used to group, filter, and interpret those events.
+The expected relationship pattern is a sales fact joined to the customer dimension through the customer key and to the product dimension through the product key. Exact physical object names and join keys will be confirmed in the committed scripts and setup notes.
 
-**Join pattern:** `fact_sales` is joined to `dim_customers` using `customer_key`, and to `dim_products` using `product_key`.
+**Grain is a key design decision.** A fact row may represent an order line rather than a complete order. Therefore, row counts and order counts are not interchangeable. Distinct order counts should be used where the business question asks for orders rather than transaction rows.
 
-## 5. Reporting outputs
+## Methods and SQL capabilities
 
-The reporting stage creates two reusable views:
+- Joins, filtering, and relational exploration
+- Aggregations and grouping with `GROUP BY`
+- Common Table Expressions (CTEs) and derived tables
+- Ranking with `ROW_NUMBER()` and `RANK()`
+- Window aggregates with `SUM() OVER()` and `AVG() OVER()`
+- Period comparisons with `LAG()`
+- Date grouping and calculations with functions such as `YEAR()`, `MONTH()`, `DATEDIFF()`, and `DATETRUNC()`
+- Conditional classification using `CASE`
+- Reusable reporting logic through SQL Server views
 
-### `gold.report_customers`
+## Reporting design
 
-A customer-level analytical view designed to summarise purchasing behaviour. Its measures and derived attributes include:
+The reporting pattern is:
 
-- Total orders, sales, quantity, and distinct products
-- Customer lifespan and most recent order date
-- Recency, average order value, and average monthly spend
-- Age group and customer segment classifications
+1. **Base dataset:** join the fact table with the relevant dimensions and select the columns needed.
+2. **Transformation:** derive or standardise fields using documented business rules.
+3. **Aggregation:** group to the required reporting grain, such as one row per customer or product.
+4. **Enrichment:** calculate ratios, recency, lifespan, and classifications.
+5. **Reporting view:** expose the final result through a reusable SQL Server view.
 
-### `gold.report_products`
+A normal SQL Server view stores a query definition; it does not automatically store a materialised copy of the result.
 
-A product-level analytical view designed to summarise product performance. Its measures and derived attributes include:
-
-- Total sales, quantity, and orders
-- Number of distinct customers
-- Product lifespan and most recent order date
-- Recency and sales performance category
-- Average sales per unit and derived sales metrics
-
-Business rules and calculation definitions should be reviewed alongside the SQL before these views are used for operational or financial decisions.
-
-## 6. SQL techniques demonstrated
-
-- Relational joins and filtering
-- Aggregations with `GROUP BY`
-- Common Table Expressions (CTEs)
-- Subqueries and derived tables
-- Ranking functions such as `ROW_NUMBER()` and `RANK()`
-- Analytic window functions such as `SUM() OVER()`, `AVG() OVER()`, and `LAG()`
-- Date functions such as `YEAR()`, `MONTH()`, `DATEDIFF()`, and `DATETRUNC()`
-- Conditional business logic with `CASE`
-- Views for reusable reporting datasets
-
-## 7. Repository structure
+## Repository structure
 
 ```text
 sql-advanced-analytics/
@@ -119,29 +114,69 @@ sql-advanced-analytics/
 ├── docs/
 │   ├── architecture.md
 │   ├── analytics-workflow.md
+│   ├── business-rules-and-validation.md
+│   ├── interview-guide.md
 │   └── README.md
 └── README.md
 ```
 
-SQL scripts will be placed in the folder matching their topic. The original learning queries are to be preserved; suggested corrections and review notes should be documented separately rather than silently changing the original work.
+## Technology and prerequisites
 
-## 8. Tools and environment
+- Microsoft SQL Server with support for the T-SQL functions used in the scripts
+- SQL Server Management Studio (SSMS) or an equivalent SQL editor
+- Access to the upstream warehouse's Gold Layer tables
+- Git and GitHub
 
-- Microsoft SQL Server
-- T-SQL
-- SQL Server Management Studio (SSMS) or a compatible SQL editor
-- Git and GitHub for version control
+The analysis is written for SQL Server/T-SQL, not generic ANSI SQL. Function availability can vary by SQL Server version; for example, confirm that the target version supports `DATETRUNC()` before executing scripts that use it.
 
-## 9. Project status and validation
+## How to run
 
-The 12-topic analytics workflow and the customer/product reporting exercises have been completed as learning exercises. The repository structure and documentation are now in place.
+The run instructions will be finalised when the executable scripts are committed. The intended sequence is:
 
-The project should be considered **portfolio-ready only after** the complete SQL scripts, data/schema assumptions, execution checks, and report calculations have been reviewed and validated against the source database. No claim is made here that the scripts have been independently executed in this repository.
+1. Build or restore the upstream warehouse using the [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project).
+2. Confirm the Gold Layer tables, column names, data types, and relationships.
+3. Execute the EDA scripts to understand the dataset and baseline measures.
+4. Execute the advanced analytics scripts.
+5. Create the customer and product reporting views.
+6. Run the validation checks and compare report totals with source aggregates.
 
-## 10. Related project
+Do not execute the reporting stage until the physical table names and column definitions have been checked against the target database.
 
-The upstream warehouse project covers data ingestion, transformation, data quality, and the Bronze/Silver/Gold architecture:
+## Quality and analytical controls
+
+The project documentation includes checks for:
+
+- Join cardinality and unintended row multiplication
+- Reporting grain and one-row-per-entity expectations
+- Reconciliation of aggregate totals to source data
+- Null, zero, and missing-date handling
+- Division-by-zero protection
+- Date boundary behaviour and recency definitions
+- Consistent segment thresholds and correctly named metrics
+
+See [Business rules and validation](docs/business-rules-and-validation.md) for the review checklist and known calculation risks.
+
+## Interview preparation
+
+[Interview guide](docs/interview-guide.md) contains a concise project explanation, a suggested walkthrough, and technical questions to prepare for. Be ready to explain the grain of the fact table, the logic behind each metric, and how you validated the results—not just the SQL syntax.
+
+## Current delivery status
+
+| Deliverable | Status |
+|---|---|
+| Project overview and architecture documentation | Committed |
+| 12-topic analytical workflow documentation | Committed |
+| Interview and validation guides | Committed |
+| Original executable SQL scripts | To be added |
+| Query outputs or screenshots | To be added |
+| End-to-end execution and reconciliation evidence | Pending |
+
+The 12-topic workflow and the customer/product reporting exercises have been completed as learning work. The repository is being prepared as a reproducible portfolio submission; it is not yet claiming that all SQL files have been independently executed and validated from this repository.
+
+## Related project
+
+The upstream warehouse implementation is maintained separately:
 
 [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project)
 
-This repository focuses on the next step: using the Gold Layer to perform business analysis and create reporting outputs.
+That project focuses on the data foundation and Bronze/Silver/Gold layers. This repository focuses on analytical use of the Gold Layer.
