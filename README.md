@@ -63,7 +63,7 @@ The project is organised into 12 topics in two stages.
 | 11 | Data segmentation | Group products and customers using explicit business rules |
 | 12 | Reporting | Combine calculations into reusable customer and product views |
 
-See [Analytics workflow](docs/analytics-workflow.md) for topic-level explanations and [Architecture](docs/architecture.md) for the end-to-end diagram.
+See [Analytics workflow](docs/analytics-workflow.md) for topic-level explanations and [Architecture](docs/architecture.md) for the end-to-end workflow and fact/dimension diagrams. The portfolio groups the two reporting outputs (customer and product) under one reporting topic; the learning reference may number those deliverables separately.
 
 ## Data model and analytical grain
 
