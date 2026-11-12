@@ -173,6 +173,10 @@ See [Business rules and validation](docs/business-rules-and-validation.md) for t
 
 The 12-topic workflow and the customer/product reporting exercises have been completed as learning work. The repository is being prepared as a reproducible portfolio submission; it is not yet claiming that all SQL files have been independently executed and validated from this repository.
 
+## Learning reference and attribution
+
+This project follows a learning workflow inspired by [Data With Baraa — SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project), which provides the original educational roadmap, datasets, and example SQL materials. This repository is a separate personal learning and portfolio workspace; it is not the upstream project and is not affiliated with or endorsed by its author. Any source code copied or adapted from the upstream repository must retain the applicable attribution and license notices. Original modifications, additional validation, and project-specific explanations should be identified clearly.
+
 ## Related project
 
 The upstream warehouse implementation is maintained separately:
