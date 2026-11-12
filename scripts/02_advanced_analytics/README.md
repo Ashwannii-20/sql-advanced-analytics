@@ -1,6 +1,6 @@
 # Advanced Analytics
 
-This folder contains T-SQL scripts for:
+This folder is reserved for the T-SQL scripts covering:
 
 1. Change-over-time analysis
 2. Cumulative analysis
@@ -8,4 +8,6 @@ This folder contains T-SQL scripts for:
 4. Part-to-whole analysis
 5. Data segmentation
 
-Topics include date aggregation, window functions, running totals, period comparisons, contribution analysis, and business-rule-based segmentation.
+The topics use date aggregation, window functions, running totals, period comparisons, contribution analysis, and business-rule-based segmentation.
+
+**Current status:** Folder guide committed; executable SQL scripts are not yet committed. Add the original queries first, then place reviewed versions or corrections alongside them with clear filenames and notes.
