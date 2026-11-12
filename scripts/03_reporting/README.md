@@ -1,8 +1,10 @@
 # Reporting
 
-This folder contains reusable SQL reporting views, including:
+This folder is reserved for the final reporting-view definitions:
 
-- Customer report: customer-level activity, sales, recency, age groups, and segments.
+- Customer report: customer-level sales, order activity, recency, age groups, and customer segments.
 - Product report: product-level sales, order/customer counts, recency, and performance categories.
 
-The report definitions will be added and validated against the Gold Layer schema.
+The intended SQL Server objects are the customer and product reporting views described in the root README.
+
+**Current status:** Reporting scope documented; executable view definitions and validation queries are not yet committed. Confirm the source schema and business thresholds before treating the reports as final.
