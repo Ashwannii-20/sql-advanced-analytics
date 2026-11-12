@@ -20,6 +20,21 @@ flowchart TD
     A --> B --> C --> D --> E --> F --> G --> H
 ```
 
+## Data model relationship
+
+The analytical queries use a dimensional pattern: descriptive dimensions provide context for the measurable sales fact. Confirm the physical object name, key uniqueness, and relationship cardinality in the source database before execution.
+
+```mermaid
+flowchart LR
+    C["Customer dimension<br/>customer_key (PK)"]
+    F["Sales fact<br/>customer_key (FK)<br/>product_key (FK)<br/>date and sales measures"]
+    P["Product dimension<br/>product_key (PK)"]
+    C -->|"1 : many"| F
+    P -->|"1 : many"| F
+```
+
+This diagram is conceptual. The actual schema and fact-table grain must be verified from the source database and scripts.
+
 ## Stage-by-stage explanation
 
 ### 1. Gold Layer data model
