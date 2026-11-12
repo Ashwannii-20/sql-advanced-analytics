@@ -107,7 +107,11 @@ For a strong technical interview, have these items available:
 
 Do not claim an output, finding, performance improvement, or validation result that you cannot reproduce from the SQL and data.
 
-## 6. Honest project boundary
+## 6. Learning reference and ownership
+
+The learning roadmap is based on the educational material in [Data With Baraa's SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project). In an interview, acknowledge the reference directly. Then explain which parts you followed, which queries or business rules you changed, and what you independently tested or added. Do not present an instructor's original framework as entirely original work.
+
+## 7. Honest project boundary
 
 The analytics exercises and reporting logic have been completed as learning work. The repository currently contains the documentation scaffold; executable SQL scripts and reproducible result evidence still need to be committed and tested. Update this section of your preparation once those artifacts are available.
 
