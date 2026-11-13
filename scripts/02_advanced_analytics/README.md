@@ -1,13 +1,13 @@
-# Advanced Analytics
+# Advanced Analytics — Scripts 07–11
 
-This folder is reserved for the T-SQL scripts covering:
+These scripts analyse movement over time and compare business performance.
 
-1. Change-over-time analysis
-2. Cumulative analysis
-3. Performance analysis
-4. Part-to-whole analysis
-5. Data segmentation
+| Script | Topic | Key SQL method |
+|---|---|---|
+| 07 | Change-over-time analysis | Date aggregation using `DATEFROMPARTS`, `YEAR` and `MONTH` |
+| 08 | Cumulative analysis | Ordered window aggregates and running totals |
+| 09 | Performance analysis | `AVG() OVER()`, `LAG()` and period comparisons |
+| 10 | Part-to-whole analysis | Window total and category contribution percentage |
+| 11 | Data segmentation | `CASE` rules for cost bands and customer segments |
 
-The topics use date aggregation, window functions, running totals, period comparisons, contribution analysis, and business-rule-based segmentation.
-
-**Current status:** Folder guide committed; executable SQL scripts are not yet committed. Add the original queries first, then place reviewed versions or corrections alongside them with clear filenames and notes.
+Read the comments in each file for calculation definitions and edge cases. Segmentation thresholds are illustrative learning-project rules and require business approval before operational use.
