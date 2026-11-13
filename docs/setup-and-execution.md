@@ -13,7 +13,7 @@ The existing Data Warehouse repository provides the source schema and Gold Layer
 
 ## Confirm the source model
 
-Run the first EDA script and confirm that the expected object names and columns are present. The current scripts were written against the Gold Layer definition in the linked warehouse project.
+Run `01_database_exploration.sql` and confirm that the expected object names and columns are present. The scripts were written against the Gold Layer definitions in the linked warehouse repository.
 
 Known important fields include:
 
@@ -23,7 +23,7 @@ Known important fields include:
 
 ## Execution order
 
-Execute the scripts in sequence:
+Run the 13 SQL scripts in numerical order:
 
 1. `scripts/01_exploratory_data_analysis/01_database_exploration.sql`
 2. `scripts/01_exploratory_data_analysis/02_dimensions_exploration.sql`
@@ -39,16 +39,16 @@ Execute the scripts in sequence:
 12. `scripts/03_reporting/12_report_customers.sql`
 13. `scripts/03_reporting/13_report_products.sql`
 
-The reporting scripts create or alter two views in the `gold` schema. Run them only after confirming the schema and base views exist.
+Scripts 01–11 are read-only analytical queries. Scripts 12 and 13 create or alter the customer and product reporting views in the `gold` schema.
 
-## Validation
+## Validate the reporting views
 
 After creating both reporting views, run `tests/validate_reporting_views.sql`.
 
 Review the output:
 - Duplicate-key checks should return no rows.
 - Source/report aggregate reconciliations should show no difference.
-- Entity-level EXCEPT comparisons should return no rows.
+- Entity-level `EXCEPT` comparisons should return no rows.
 - Any rows returned by the null/metric checks must be investigated.
 
 A query executing without an error is not proof that its business logic is correct. Record the SQL Server version, execution date, row counts, reconciliation outputs, and any accepted exceptions when validating the project.
@@ -56,7 +56,8 @@ A query executing without an error is not proof that its business logic is corre
 ## Important notes
 
 - The scripts use T-SQL and include SQL Server-specific functions.
-- The customer and product reports currently include entities with dated sales activity. No-activity entities are excluded by the fact-driven aggregation.
-- Recency and age metrics in the customer report use `GETDATE()`, so those fields change as time passes.
-- The inclusive active-month calculation is `DATEDIFF(MONTH, first_date, last_date) + 1`.
-- The segmentation thresholds are analytical assumptions for the learning project. They are not externally approved business policies.
+- The customer and product reports include entities with dated sales activity. Entities without dated sales are excluded.
+- Recency and age metrics in the customer report use `GETDATE()`, so those fields change over time.
+- Active calendar months use the inclusive definition `DATEDIFF(MONTH, first_date, last_date) + 1`.
+- Segmentation thresholds are analytical assumptions for this learning project, not externally approved business policies.
+- These scripts were reconstructed into a documented portfolio set from the SQL exercises and reporting logic discussed during development. They should be compared with the original local files and executed before being treated as the final validated versions.
