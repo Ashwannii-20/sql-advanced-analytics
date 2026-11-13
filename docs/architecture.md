@@ -1,110 +1,105 @@
 # Analytical Architecture and Data Flow
 
-This document explains how the project turns a dimensional sales dataset into reusable analytical reports.
+## Overview
+
+The project consumes the Gold Layer of the related [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) and applies T-SQL analysis to the sales fact and its customer and product dimensions.
+
+The workflow moves from source inspection to analytical queries and finally to reusable reporting views.
 
 ## End-to-end workflow
-
-The diagram captures the analytical process: source model → base query → transformation → aggregation → analytical result → enrichment → reporting view → consumption.
 
 ```mermaid
 flowchart TD
     A["Gold Layer data model<br/>Sales fact + customer + product dimensions"]
-    B["Base query<br/>Join fact and dimensions<br/>Select required columns"]
-    C["Transformation<br/>Apply documented business rules<br/>Derive analytical fields"]
-    D["Aggregation<br/>Group to customer or product grain<br/>Calculate core measures"]
-    E["Analytical result<br/>One row per reporting entity"]
-    F["Enrichment<br/>Recency, lifespan, ratios<br/>and business classifications"]
-    G["SQL reporting views<br/>Customer report<br/>Product report"]
-    H["Consumption<br/>SQL analysis and Power BI<br/>Business review"]
-
+    B["Source inspection<br/>Objects, columns, keys, data coverage"]
+    C["Analytical base queries<br/>Joins, filtering, selected fields"]
+    D["Business calculations<br/>Aggregations, windows, date logic"]
+    E["Entity-level reporting<br/>Customer and product grain"]
+    F["Enrichment<br/>Ratios, recency, classifications"]
+    G["SQL reporting views"]
+    H["SQL analysis / Power BI / business review"]
     A --> B --> C --> D --> E --> F --> G --> H
 ```
 
-## Data model relationship
+## Source data model
 
-The analytical queries use a dimensional pattern: descriptive dimensions provide context for the measurable sales fact. Confirm the physical object name, key uniqueness, and relationship cardinality in the source database before execution.
+| Object | Role | Relevant content |
+|---|---|---|
+| gold.fact_sales | Sales fact view | Order-line measures, order date, customer and product keys |
+| gold.dim_customers | Customer dimension | Customer identifiers, name, geography, profile, birthdate |
+| gold.dim_products | Product dimension | Product identifiers, category, subcategory, cost, product line |
 
 ```mermaid
 flowchart LR
-    C["Customer dimension<br/>customer_key (PK)"]
-    F["Sales fact<br/>customer_key (FK)<br/>product_key (FK)<br/>date and sales measures"]
-    P["Product dimension<br/>product_key (PK)"]
+    C["Customer dimension<br/>customer_key"]
+    F["Sales fact<br/>one row per order line<br/>customer_key / product_key"]
+    P["Product dimension<br/>product_key"]
     C -->|"1 : many"| F
     P -->|"1 : many"| F
 ```
 
-This diagram is conceptual. The actual schema and fact-table grain must be verified from the source database and scripts.
+The diagrams show the intended dimensional relationships. Confirm key uniqueness and relationship cardinality in the target database before drawing conclusions from joined results.
 
-## Stage-by-stage explanation
+## Fact grain and dimension coverage
 
-### 1. Gold Layer data model
+The upstream Gold Layer fact view is built from sales-detail rows and uses left joins to the customer and product dimensions. Its intended grain is one row per order line.
 
-The input is the Gold Layer dimensional model built in the separate [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project). The sales fact contains business events and measurable values. Customer and product dimensions provide descriptive context.
+This has two important consequences:
 
-Before writing analytical SQL, inspect the physical schema and confirm table names, data types, primary/surrogate keys, and join relationships.
+1. An order can occur on multiple rows, so order counts use COUNT(DISTINCT order_number).
+2. If a source sales line has no matching dimension record, the corresponding dimension key can be null. The reporting views use inner joins and include only sales rows with a matching key for the relevant dimension.
+
+The upstream product dimension contains current products only. Historical sales linked to products absent from that current dimension may not be represented in the product report. The validation script surfaces unmatched dimension keys so this coverage is visible.
+
+## Analytical processing stages
+
+### 1. Source inspection
+Confirm database context, object definitions, columns, data types, nullability, row counts, and date coverage.
 
 ### 2. Base query
-
-Join the sales fact to the required dimensions and select the fields needed for the business question. Keep the base dataset focused; bringing in unused columns makes queries harder to read and maintain.
+Join only the dimensions required by the business question. Select the fields needed for analysis and filter out records only when the metric definition requires it.
 
 ### 3. Transformation
-
-Apply documented rules such as handling missing values, deriving date attributes, or assigning categories. A transformation must preserve the meaning of the original measure. For example, do not replace an unknown value with zero unless that treatment is justified by the business definition.
+Apply documented calculations and classifications. A transformation should not alter the meaning of a measure. A missing value should not be replaced with zero unless the metric definition justifies that treatment.
 
 ### 4. Aggregation
+Group to the grain required by the question. Common measures include total sales, distinct orders, distinct customers, total units, and first/latest activity.
 
-Group data to the level required by the question. Common measures include:
+The grouping columns define the grain of the result.
 
-- Total sales: `SUM(sales_amount)`
-- Distinct orders: `COUNT(DISTINCT order_number)`
-- Distinct customers: `COUNT(DISTINCT customer_key)`
-- Total units: `SUM(quantity)`
-- Latest activity: `MAX(order_date)`
+### 5. Enrichment
+Add derived measures such as average order value, weighted sales per unit, category contribution, month-boundary recency, calendar-month span, and classification labels. Each derived field should have a documented formula and interpretation.
 
-The grouping columns define the **grain** of the result.
+### 6. Reporting views
+Expose customer- and product-level query definitions through SQL Server views. A standard view stores a query definition; it does not materialise a separate copy of the result by default.
 
-### 5. Analytical result
-
-The aggregated result should contain one row for the chosen reporting entity or group. Examples include one row per customer, one row per product, or one row per category and month.
-
-### 6. Enrichment
-
-Add derived measures and labels such as recency, activity lifespan, average order value, contribution percentage, customer segment, or product performance band. Each metric needs an explicit formula and a business definition.
-
-### 7. SQL reporting views
-
-Store the final query definitions in SQL Server views for consistent downstream use. A standard view stores its SELECT definition; it does not materialise the rows by default.
-
-### 8. Consumption
-
-The views can be queried directly or used as a source for Power BI and other reporting tools. The report layer should expose stable, clearly named fields with documented calculation logic.
+### 7. Consumption
+Query the views directly or use them as a source for Power BI and other reporting tools, after validation.
 
 ## Grain and join cardinality
 
 Grain answers: **what does one row represent?**
 
-- The sales fact may be at sales-line grain. This must be confirmed from its design and keys.
-- A customer report should normally contain one row per customer key.
-- A product report should normally contain one row per product key.
+- Sales fact: one order line.
+- Customer report: one customer with at least one qualifying dated sales record.
+- Product report: one product with at least one qualifying dated sales record.
 
-A one-to-many or many-to-many join can multiply fact rows and inflate sums. Confirm dimension-key uniqueness and compare fact-row counts and aggregate totals before and after joins.
+A join can multiply fact rows if the dimension key is not unique. Before aggregating, check dimension-key uniqueness and review the fact-row count and measures after joins.
 
 ## CTEs, views, and query design
 
-A CTE is a named query expression scoped to the single statement that follows it. It is useful for separating logical steps in a multi-stage query.
+A CTE names an intermediate query expression and is scoped to the single statement that follows it. It helps separate logical stages in multi-step analysis.
 
-A view is a persisted database object that stores a query definition and can be queried by other SQL statements. It improves reuse and provides a stable interface, but a standard view is not the same as a materialised aggregate table.
+A view is a database object that stores a SELECT definition for reuse. A standard view improves consistency and reusability but is not the same as a materialised table.
 
 ## Validation gates
 
-Before publishing a report:
-
-1. Confirm the source object names, column definitions, and join keys.
-2. Confirm the intended grain and dimension-key uniqueness.
-3. Check for row multiplication after joins.
-4. Reconcile sums and distinct counts with trusted source queries.
-5. Define treatment for nulls, zeros, and missing dates.
-6. Protect ratios from zero denominators.
-7. Review date-boundary logic and business thresholds.
-8. Check that each metric's name matches its formula.
-9. Confirm the final output has the expected columns and entity-level uniqueness.
+1. Confirm source objects, columns, keys, and data types.
+2. Confirm dimension-key uniqueness.
+3. Identify fact rows with missing customer or product mappings.
+4. Confirm the intended grain before and after each join.
+5. Reconcile sums and distinct counts to independent source queries.
+6. Define treatment for nulls, zeros, and missing dates.
+7. Protect ratio calculations from zero denominators.
+8. Review date-boundary logic and business thresholds.
+9. Confirm the final result has the expected columns and one row per reporting entity.
