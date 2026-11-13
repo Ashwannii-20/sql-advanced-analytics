@@ -1,63 +1,78 @@
-# Setup and Execution Guide
+# Setup and Execution
 
 ## Prerequisites
 
-- Microsoft SQL Server and SSMS (or a compatible T-SQL client).
-- The separate [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) restored or executed.
-- A database named `DataWarehouse` containing the Gold Layer views:
-  - `gold.fact_sales`
-  - `gold.dim_customers`
-  - `gold.dim_products`
+- Microsoft SQL Server and SQL Server Management Studio (SSMS), or a compatible T-SQL client.
+- The related [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) built or restored.
+- A database named DataWarehouse containing these Gold Layer views:
+  - gold.fact_sales
+  - gold.dim_customers
+  - gold.dim_products
 
-The existing Data Warehouse repository provides the source schema and Gold Layer views. This analytics repository does not recreate or drop that database.
+This repository consumes the existing Gold Layer. It does not create or drop the upstream warehouse database.
 
-## Confirm the source model
+## 1. Confirm the source model
 
-Run `01_database_exploration.sql` and confirm that the expected object names and columns are present. The scripts were written against the Gold Layer definitions in the linked warehouse repository.
+Open scripts/01_exploratory_data_analysis/01_database_exploration.sql and confirm the expected objects, columns, and data types exist.
 
-Known important fields include:
+The scripts expect these fields:
 
-- Fact: `order_number`, `product_key`, `customer_key`, `order_date`, `sales_amount`, `quantity`, `price`.
-- Customer: `customer_key`, `customer_id`, `customer_number`, `first_name`, `last_name`, `country`, `gender`, `marital_status`, `birthdate`.
-- Product: `product_key`, `product_id`, `product_number`, `product_name`, `category`, `subcategory`, `cost`, `product_line`, `start_date`.
+- **Fact:** order_number, product_key, customer_key, order_date, sales_amount, quantity, price.
+- **Customer:** customer_key, customer_id, customer_number, first_name, last_name, country, gender, marital_status, birthdate.
+- **Product:** product_key, product_id, product_number, product_name, category, subcategory, cost, product_line, start_date.
 
-## Execution order
+## 2. Execute the analytical scripts
 
-Run the 13 SQL scripts in numerical order:
+Run scripts 01–11 in numerical order:
 
-1. `scripts/01_exploratory_data_analysis/01_database_exploration.sql`
-2. `scripts/01_exploratory_data_analysis/02_dimensions_exploration.sql`
-3. `scripts/01_exploratory_data_analysis/03_date_range_exploration.sql`
-4. `scripts/01_exploratory_data_analysis/04_measures_exploration.sql`
-5. `scripts/01_exploratory_data_analysis/05_magnitude_analysis.sql`
-6. `scripts/01_exploratory_data_analysis/06_ranking_analysis.sql`
-7. `scripts/02_advanced_analytics/07_change_over_time_analysis.sql`
-8. `scripts/02_advanced_analytics/08_cumulative_analysis.sql`
-9. `scripts/02_advanced_analytics/09_performance_analysis.sql`
-10. `scripts/02_advanced_analytics/10_part_to_whole_analysis.sql`
-11. `scripts/02_advanced_analytics/11_data_segmentation.sql`
-12. `scripts/03_reporting/12_report_customers.sql`
-13. `scripts/03_reporting/13_report_products.sql`
+1. scripts/01_exploratory_data_analysis/01_database_exploration.sql
+2. scripts/01_exploratory_data_analysis/02_dimensions_exploration.sql
+3. scripts/01_exploratory_data_analysis/03_date_range_exploration.sql
+4. scripts/01_exploratory_data_analysis/04_measures_exploration.sql
+5. scripts/01_exploratory_data_analysis/05_magnitude_analysis.sql
+6. scripts/01_exploratory_data_analysis/06_ranking_analysis.sql
+7. scripts/02_advanced_analytics/07_change_over_time_analysis.sql
+8. scripts/02_advanced_analytics/08_cumulative_analysis.sql
+9. scripts/02_advanced_analytics/09_performance_analysis.sql
+10. scripts/02_advanced_analytics/10_part_to_whole_analysis.sql
+11. scripts/02_advanced_analytics/11_data_segmentation.sql
 
-Scripts 01–11 are read-only analytical queries. Scripts 12 and 13 create or alter the customer and product reporting views in the `gold` schema.
+Scripts 01–11 are analytical queries and do not create or alter database objects.
 
-## Validate the reporting views
+## 3. Create the reporting views
 
-After creating both reporting views, run `tests/validate_reporting_views.sql`.
+Run:
 
-Review the output:
-- Duplicate-key checks should return no rows.
-- Source/report aggregate reconciliations should show no difference.
-- Entity-level `EXCEPT` comparisons should return no rows.
-- Any rows returned by the null/metric checks must be investigated.
+12. scripts/03_reporting/12_report_customers.sql
+13. scripts/03_reporting/13_report_products.sql
 
-A query executing without an error is not proof that its business logic is correct. Record the SQL Server version, execution date, row counts, reconciliation outputs, and any accepted exceptions when validating the project.
+These scripts use CREATE OR ALTER VIEW to create or update gold.report_customers and gold.report_products.
 
-## Important notes
+The customer report includes dated fact rows with a matching customer key. The product report includes dated fact rows with a matching product key. The two views can therefore represent different mapped populations when source dimension keys are missing.
 
-- The scripts use T-SQL and include SQL Server-specific functions.
-- The customer and product reports include entities with dated sales activity. Entities without dated sales are excluded.
-- Recency and age metrics in the customer report use `GETDATE()`, so those fields change over time.
-- Active calendar months use the inclusive definition `DATEDIFF(MONTH, first_date, last_date) + 1`.
-- Segmentation thresholds are analytical assumptions for this learning project, not externally approved business policies.
-- These scripts were reconstructed into a documented portfolio set from the SQL exercises and reporting logic discussed during development. They should be compared with the original local files and executed before being treated as the final validated versions.
+## 4. Run the validation script
+
+Execute tests/validate_reporting_views.sql after both views have been created.
+
+Review each result set:
+
+- Dimension-key uniqueness checks should return no rows.
+- Duplicate reporting-key checks should return no rows.
+- Unmatched fact-key checks should be reviewed and explained.
+- Source-to-report reconciliations should have zero differences for the mapped populations used by each report.
+- Entity-level EXCEPT comparisons should return no rows.
+- Unexpected null or invalid report metrics should be investigated.
+
+A query completing without a SQL error is not proof that its business logic is correct. Record the SQL Server version, execution date, result counts, reconciliation outputs, and accepted exceptions.
+
+## Important implementation notes
+
+- The scripts use SQL Server T-SQL syntax.
+- The upstream sales fact is at order-line grain.
+- The upstream product dimension contains current products only.
+- The upstream fact view uses left joins; unmatched dimension keys can be null.
+- Reporting views use inner joins and exclude fact rows without a matching key for the relevant dimension.
+- The inclusive calendar-month span is DATEDIFF(MONTH, first_date, last_date) + 1; it is not a count of months with purchases.
+- Age and month-boundary recency use GETDATE() and therefore change over time.
+- Customer and product thresholds are illustrative assumptions for this portfolio project.
+- The committed SQL files are curated portfolio versions. Compare them with any local working copies before treating this repository as the canonical execution copy.
