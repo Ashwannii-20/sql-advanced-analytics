@@ -2,15 +2,15 @@
     Project : SQL Advanced Analytics
     Script  : 13 - Product Report
     Output  : gold.report_products
-    Grain   : One row per product with at least one dated sales record.
+    Grain   : One row per product with dated sales and a matching product dimension record.
 
     Metric definitions:
       - total_orders: distinct order numbers, not sales-line count.
       - distinct_customers: distinct customer keys.
-      - average_selling_price_per_unit: total sales / total quantity
+      - weighted_sales_per_unit: total sales / total quantity
         (weighted average).
-      - average_order_value: total sales / distinct orders.
-      - average_monthly_sales: total sales / inclusive active calendar months.
+      - average_product_sales_per_order: total sales / distinct orders.
+      - average_sales_per_calendar_month_in_span: total sales / inclusive sales activity month span.
 
     Products with no dated sales are not included because the aggregation
     is driven from the sales fact. Use the product dimension as the driving
@@ -75,11 +75,11 @@ product_metrics AS
 (
     SELECT
         *,
-        DATEDIFF(MONTH, first_order_date, last_order_date) + 1 AS active_calendar_months,
-        DATEDIFF(MONTH, last_order_date, CONVERT(date, GETDATE())) AS recency_months,
-        total_sales / NULLIF(CONVERT(decimal(18, 2), total_quantity), 0) AS average_selling_price_per_unit,
-        total_sales / NULLIF(CONVERT(decimal(18, 2), total_orders), 0) AS average_order_value,
-        total_sales / NULLIF(CONVERT(decimal(18, 2), DATEDIFF(MONTH, first_order_date, last_order_date) + 1), 0) AS average_monthly_sales
+        DATEDIFF(MONTH, first_order_date, last_order_date) + 1 AS sales_activity_month_span,
+        DATEDIFF(MONTH, last_order_date, CONVERT(date, GETDATE())) AS months_since_last_order_month_boundary,
+        CONVERT(decimal(19, 4), total_sales) / NULLIF(CONVERT(decimal(19, 4), total_quantity), 0) AS weighted_sales_per_unit,
+        CONVERT(decimal(19, 4), total_sales) / NULLIF(CONVERT(decimal(19, 4), total_orders), 0) AS average_product_sales_per_order,
+        CONVERT(decimal(19, 4), total_sales) / NULLIF(CONVERT(decimal(19, 4), DATEDIFF(MONTH, first_order_date, last_order_date) + 1), 0) AS average_sales_per_calendar_month_in_span
     FROM product_aggregation
 )
 SELECT
@@ -93,20 +93,20 @@ SELECT
     cost,
     first_order_date,
     last_order_date,
-    active_calendar_months,
-    recency_months,
+    sales_activity_month_span,
+    months_since_last_order_month_boundary,
     total_orders,
     distinct_customers,
     total_quantity,
     total_sales,
-    average_selling_price_per_unit,
-    average_order_value,
-    average_monthly_sales,
+    weighted_sales_per_unit,
+    average_product_sales_per_order,
+    average_sales_per_calendar_month_in_span,
     CASE
         WHEN total_sales > 50000 THEN 'High Performance'
         WHEN total_sales >= 10000 THEN 'Medium Performance'
         ELSE 'Low Performance'
-    END AS sales_performance_category
+    END AS revenue_performance_band
 FROM product_metrics;
 GO
 
