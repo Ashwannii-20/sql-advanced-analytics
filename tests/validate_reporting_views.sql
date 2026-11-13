@@ -1,43 +1,83 @@
 /*
     Project : SQL Advanced Analytics
     Script  : Reporting View Validation
-    Purpose : Check report grain, coverage, and key aggregate reconciliation.
+    Purpose : Validate dimension keys, unmatched fact rows, report grain,
+              and aggregate reconciliation.
 
-    Run after scripts/03_reporting/12_report_customers.sql and
-    scripts/03_reporting/13_report_products.sql.
+    Run after creating gold.report_customers and gold.report_products.
 
-    Expected behaviour:
-      - Duplicate-key queries should return no rows.
-      - Source-versus-report reconciliation should show zero differences.
-      - Entity-level EXCEPT checks should return no rows.
-
-    These checks have been authored but still need execution against the
-    user's SQL Server database before results can be claimed as verified.
+    This script distinguishes the full dated fact population from the
+    mapped populations included in each report. Investigate unmatched
+    dimension keys; do not assume they are harmless.
 */
 
 USE DataWarehouse;
 GO
 
--- 1. Customer report: duplicate customer keys should not exist.
+-- 1. Customer dimension keys should be unique.
+SELECT
+    customer_key,
+    COUNT(*) AS duplicate_count
+FROM gold.dim_customers
+GROUP BY customer_key
+HAVING customer_key IS NULL OR COUNT(*) > 1;
+GO
+
+-- 2. Product dimension keys should be unique.
+SELECT
+    product_key,
+    COUNT(*) AS duplicate_count
+FROM gold.dim_products
+GROUP BY product_key
+HAVING product_key IS NULL OR COUNT(*) > 1;
+GO
+
+-- 3. Dated fact rows without a matching customer dimension record.
+-- Review both the number of affected order lines and their sales value.
+SELECT
+    COUNT_BIG(*) AS unmatched_customer_fact_rows,
+    COUNT(DISTINCT f.order_number) AS affected_orders,
+    SUM(f.sales_amount) AS sales_on_unmatched_customer_rows
+FROM gold.fact_sales AS f
+LEFT JOIN gold.dim_customers AS c
+    ON f.customer_key = c.customer_key
+WHERE f.order_date IS NOT NULL
+  AND c.customer_key IS NULL;
+GO
+
+-- 4. Dated fact rows without a matching product dimension record.
+-- The upstream product dimension contains current products only.
+SELECT
+    COUNT_BIG(*) AS unmatched_product_fact_rows,
+    COUNT(DISTINCT f.order_number) AS affected_orders,
+    SUM(f.sales_amount) AS sales_on_unmatched_product_rows
+FROM gold.fact_sales AS f
+LEFT JOIN gold.dim_products AS p
+    ON f.product_key = p.product_key
+WHERE f.order_date IS NOT NULL
+  AND p.product_key IS NULL;
+GO
+
+-- 5. Customer report should contain one row per customer key.
 SELECT
     customer_key,
     COUNT(*) AS duplicate_count
 FROM gold.report_customers
 GROUP BY customer_key
-HAVING COUNT(*) > 1;
+HAVING customer_key IS NULL OR COUNT(*) > 1;
 GO
 
--- 2. Product report: duplicate product keys should not exist.
+-- 6. Product report should contain one row per product key.
 SELECT
     product_key,
     COUNT(*) AS duplicate_count
 FROM gold.report_products
 GROUP BY product_key
-HAVING COUNT(*) > 1;
+HAVING product_key IS NULL OR COUNT(*) > 1;
 GO
 
--- 3. Reconcile customer-report coverage and sales against the dated fact rows
--- that have a matching customer dimension row.
+-- 7. Reconcile customer report coverage and sales to dated fact rows
+-- with a matching customer dimension record.
 WITH expected_customer_totals AS
 (
     SELECT
@@ -65,8 +105,8 @@ FROM expected_customer_totals AS e
 CROSS JOIN actual_customer_totals AS a;
 GO
 
--- 4. Reconcile product-report coverage and sales against dated fact rows
--- that have a matching product dimension row.
+-- 8. Reconcile product report coverage and sales to dated fact rows
+-- with a matching product dimension record.
 WITH expected_product_totals AS
 (
     SELECT
@@ -94,7 +134,7 @@ FROM expected_product_totals AS e
 CROSS JOIN actual_product_totals AS a;
 GO
 
--- 5. Compare customer report metrics with an independent aggregation.
+-- 9. Compare customer report metrics with an independent aggregation.
 -- Any returned row indicates a difference that needs investigation.
 WITH expected AS
 (
@@ -135,7 +175,7 @@ FROM
 ) AS report_differences;
 GO
 
--- 6. Compare product report metrics with an independent aggregation.
+-- 10. Compare product report metrics with an independent aggregation.
 WITH expected AS
 (
     SELECT
@@ -177,7 +217,7 @@ FROM
 ) AS report_differences;
 GO
 
--- 7. Identify report rows with unexpected null or negative core metrics.
+-- 11. Identify report rows with unexpected null or non-positive core metrics.
 SELECT *
 FROM gold.report_customers
 WHERE customer_key IS NULL
