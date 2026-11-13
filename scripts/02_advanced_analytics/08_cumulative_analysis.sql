@@ -27,7 +27,7 @@ SELECT
         ORDER BY month_start
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS cumulative_sales,
-    AVG(monthly_sales) OVER (
+    AVG(CONVERT(decimal(19, 4), monthly_sales)) OVER (
         ORDER BY month_start
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
     ) AS cumulative_average_monthly_sales
