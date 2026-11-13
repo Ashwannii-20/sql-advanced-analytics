@@ -79,7 +79,19 @@ The analysis consumes the Gold Layer of a separate dimensional warehouse project
 
 The fact view is at **sales-line grain**: one row represents a product line within an order. Therefore, row count and order count are not interchangeable. The scripts use `COUNT(DISTINCT order_number)` when the question asks for distinct orders.
 
-The fact view links to customers with `customer_key` and products with `product_key`. See [the architecture guide](docs/architecture.md) for the relationship and workflow diagrams.
+The fact view links to customers with `customer_key` and products with `product_key`. The following diagram shows the analytical flow:
+
+```mermaid
+flowchart TD
+    A[Gold Layer: Fact + Dimensions] --> B[Base Query: Joins and Selection]
+    B --> C[Transformations and Business Rules]
+    C --> D[Aggregation to Customer / Product Grain]
+    D --> E[Enrichment: Ratios, Recency, Segments]
+    E --> F[Customer and Product SQL Views]
+    F --> G[Power BI / Reporting / Business Analysis]
+```
+
+See [the architecture guide](docs/architecture.md) for the detailed explanation and fact/dimension relationship diagram.
 
 ## Methods and SQL capabilities
 
