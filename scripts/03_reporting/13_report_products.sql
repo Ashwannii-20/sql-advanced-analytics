@@ -12,9 +12,10 @@
       - average_product_sales_per_order: total sales / distinct orders.
       - average_sales_per_calendar_month_in_span: total sales / inclusive sales activity month span.
 
-    Products with no dated sales are not included because the aggregation
-    is driven from the sales fact. Use the product dimension as the driving
-    table with LEFT JOIN if zero-sales products must also be reported.
+    Products with no dated sales or no matching current product dimension
+    record are excluded by the fact-driven inner join. Use the product
+    dimension as the driving table with LEFT JOIN if zero-sales products
+    must also be reported; define historical-product coverage separately.
 */
 
 USE DataWarehouse;
