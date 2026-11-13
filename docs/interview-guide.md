@@ -4,9 +4,9 @@ Use this guide to explain the project clearly and accurately in a technical or a
 
 ## 1. 60-second project introduction
 
-> I built a SQL Server analytics project on top of a dimensional data warehouse. The warehouse provides a Gold Layer sales fact and customer and product dimensions. I used T-SQL to explore the data, establish baseline measures, analyse sales by business dimensions and time, rank performance, calculate running totals and period comparisons, measure category contribution, and segment customers and products. I then structured customer-level and product-level reporting logic into reusable SQL views. I focused on making the analysis understandable and validating the reporting grain, joins, calculations, and business rules. The warehouse implementation is maintained separately from this analytics repository.
+> I built a SQL Server analytics project on top of a dimensional data warehouse that I maintain in a separate repository. The warehouse exposes a Gold Layer sales fact view connected to customer and product dimensions. I used T-SQL to explore the data, establish baseline measures, analyse sales by business dimensions and time, rank performance, calculate running totals and period comparisons, measure category contribution, and segment customers and products. I then developed customer-level and product-level reporting views. I also documented the reporting grain, metric definitions, edge cases, and reconciliation checks so the analytical outputs can be reviewed systematically.
 
-Use this as a speaking framework. Be prepared to show the actual scripts and query outputs once those artifacts have been committed.
+Be ready to show the SQL scripts, explain the logic, and run the validation checks. The current repository contains 13 documented scripts; execution and reconciliation evidence must still be produced from the target SQL Server environment.
 
 ## 2. Suggested interview walkthrough
 
@@ -16,7 +16,7 @@ The business has sales transactions but needs to understand performance and cust
 
 ### Step 2 — Explain the data model
 
-Describe the sales fact and the customer/product dimensions. Explain the join keys and, most importantly, what one fact row represents. Do not assume the fact is at order grain if it is actually at order-line grain.
+Describe the sales fact and the customer/product dimensions. Explain the join keys and, most importantly, what one fact row represents. In this warehouse, the fact view is at sales-line grain. One order can therefore appear in multiple rows.
 
 ### Step 3 — Demonstrate exploratory analysis
 
@@ -52,7 +52,7 @@ A CTE exists for one statement. A view is a database object that stores a query 
 
 ### Why use `COUNT(DISTINCT order_number)` instead of `COUNT(*)`?
 
-If each order can contain multiple sales lines, `COUNT(*)` counts rows or lines, not unique orders. The correct count depends on the fact table's grain and the business question.
+The fact view is at sales-line grain, so an order may create multiple fact rows. `COUNT(*)` counts sales lines; `COUNT(DISTINCT order_number)` counts unique orders.
 
 ### What is the difference between `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()`?
 
@@ -78,42 +78,41 @@ Grain defines what one row represents. Incorrect assumptions about grain can cau
 
 ### How do you validate an aggregate report?
 
-Check dimension-key uniqueness, inspect row counts before and after joins, compare totals with the source fact, verify the report's entity grain, test null/zero cases, and check a few entities manually.
+Check dimension-key uniqueness, inspect row counts before and after joins, compare totals with the source fact, verify the report's entity grain, test null/zero cases, and compare report metrics with independent source aggregates.
 
-## 4. Project-specific review points
+## 4. Project-specific design decisions
 
-These are important items identified while reviewing the SQL exercises discussed during development. Resolve them in the scripts before describing the reports as final:
+- **Sales-line grain:** fact rows are not equivalent to distinct orders; use distinct order numbers for order counts.
+- **Running total:** the all-time cumulative calculation orders by month without partitioning by that same month.
+- **Year comparisons:** `LAG()` is labelled as previous available year; missing years are not silently assumed to be zero.
+- **Age:** the customer report adjusts age for whether the birthday has occurred this year.
+- **Month lifespan:** active calendar months are defined inclusively as `DATEDIFF(MONTH, first_date, last_date) + 1`.
+- **Average selling price:** product report uses total sales divided by total quantity, a weighted calculation.
+- **Average order value:** total sales divided by distinct orders.
+- **Average monthly sales:** total sales divided by inclusive active calendar months.
+- **Customer segmentation:** VIP uses sales of at least 5,000 and activity across at least 12 calendar months; Regular uses sales of at least 1,000 and at least 12 active calendar months; all others are New. These are learning-project assumptions, not a universal business policy.
+- **Customer/product coverage:** the reports are fact-driven and include entities with dated sales activity; entities with no dated sales are not included.
+- **Dynamic age and recency:** these use the current system date and change as time passes.
 
-- **Running total:** remove the partition by the same date/month when the required result is cumulative across the full timeline.
-- **Ranking direction:** `TOP (N)` with ascending order returns the smallest values. Label it as a bottom-N analysis, or sort descending for top-N.
-- **Previous-period comparison:** explain that `LAG()` uses the prior available row unless missing periods are filled.
-- **Age calculation:** `DATEDIFF(YEAR, birth_date, current_date)` can overstate age before the birthday in the current year.
-- **Month calculations:** `DATEDIFF(MONTH, start_date, end_date)` counts month boundaries, not necessarily complete elapsed months.
-- **Average per unit:** `AVG(sales_amount / quantity)` is an average of row-level ratios. A weighted average selling price is usually `SUM(sales_amount) / NULLIF(SUM(quantity), 0)`.
-- **Metric naming:** total sales divided by lifespan months is average monthly sales, not average sales per order.
-- **Segment consistency:** use the same threshold definitions in exploratory segmentation and the final customer report, or explain why the definitions differ.
-- **Customer coverage:** a report built from the sales fact excludes customers with no sales unless the query starts from the customer dimension and handles missing fact rows.
-- **Dynamic recency:** calculations using the current system date change over time. State the reference date or make it a controlled parameter for reproducible reporting.
+## 5. Validation evidence to show
 
-## 5. What to show on screen
+Run `tests/validate_reporting_views.sql` after creating the two reporting views. Be prepared to show:
 
-For a strong technical interview, have these items available:
-
-1. The architecture diagram and the fact/dimension join diagram.
-2. The actual SQL script for one EDA example, one window-function example, one segmentation example, and each reporting view.
-3. Query outputs with the column names and a few representative rows.
-4. Reconciliation or validation queries showing that totals and row grain are correct.
-5. A short explanation of the business definition behind each derived metric.
+1. Duplicate customer and product key checks.
+2. Source-to-report sales and entity-count reconciliations.
+3. Entity-level `EXCEPT` comparisons.
+4. A few manually inspected customer and product records.
+5. The SQL Server version and date on which you executed the scripts.
 
 Do not claim an output, finding, performance improvement, or validation result that you cannot reproduce from the SQL and data.
 
 ## 6. Learning reference and ownership
 
-The learning roadmap is based on the educational material in [Data With Baraa's SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project). In an interview, acknowledge the reference directly. Then explain which parts you followed, which queries or business rules you changed, and what you independently tested or added. Do not present an instructor's original framework as entirely original work.
+The learning roadmap is inspired by [Data With Baraa's SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project). In an interview, acknowledge the reference directly. Then explain the parts you followed, the query logic you reviewed or changed, and what you independently tested or added. Do not present an instructor's original framework as entirely original work.
 
 ## 7. Honest project boundary
 
-The analytics exercises and reporting logic have been completed as learning work. The repository currently contains the documentation scaffold; executable SQL scripts and reproducible result evidence still need to be committed and tested. Update this section of your preparation once those artifacts are available.
+The repository contains 13 documented T-SQL working scripts aligned to the Gold Layer schema in the separate personal warehouse project, plus documentation and a validation script. They were reconstructed into portfolio form from the queries and logic discussed during development; they are not confirmed to be byte-for-byte copies of the original local files. End-to-end execution and validation evidence is still pending.
 
 In an interview, distinguish clearly between:
 - what you personally wrote and tested,
