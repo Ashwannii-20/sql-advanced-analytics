@@ -34,7 +34,7 @@ product_performance AS
 (
     SELECT
         *,
-        AVG(annual_sales) OVER (
+        AVG(CONVERT(decimal(19, 4), annual_sales)) OVER (
             PARTITION BY product_key
         ) AS average_annual_sales,
         LAG(order_year) OVER (
@@ -69,8 +69,8 @@ SELECT
         WHEN annual_sales < previous_available_year_sales THEN 'Decrease'
         ELSE 'No Change'
     END AS period_performance,
-    (annual_sales - previous_available_year_sales)
-        / NULLIF(previous_available_year_sales, 0) * 100.0 AS percentage_change
+    CONVERT(decimal(19, 4), annual_sales - previous_available_year_sales)
+        / NULLIF(CONVERT(decimal(19, 4), previous_available_year_sales), 0) * 100.0 AS percentage_change
 FROM product_performance
 ORDER BY product_key, order_year;
 GO
