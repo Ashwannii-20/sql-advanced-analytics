@@ -1,104 +1,112 @@
 # Business Rules, Metric Definitions, and Validation
 
-This file records the metrics and business assumptions implemented in the current portfolio scripts, along with the checks required before the reports can be treated as final.
+This document records the metric formulas and classification assumptions used by the portfolio scripts. It also defines the checks required before the reporting views are treated as validated.
 
 ## 1. Metric definition register
 
-| Metric | Definition used in the scripts | Important interpretation |
+| Metric | Formula / implementation | Interpretation |
 |---|---|---|
-| Total sales | Sum of sales amount at fact grain | Confirm currency and additive treatment |
-| Total quantity | Sum of transaction quantity | Assumes a consistent unit of measure |
-| Distinct orders | Count of distinct order numbers | The fact is at sales-line grain; row count is not order count |
-| Distinct customers | Count of distinct customer keys | Confirm treatment of any unknown/placeholder keys |
-| Average order value | Total sales divided by distinct orders | Protect against zero orders |
-| Average selling price per unit | Total sales divided by total quantity | Weighted calculation; confirm treatment of discounts/tax |
-| Recency | Month boundaries from last activity to current date | Uses `GETDATE()`; result changes with time |
-| Active calendar months | `DATEDIFF(MONTH, first_date, last_date) + 1` | Inclusive count of calendar months touched, not complete elapsed months |
-| Category contribution | Category sales divided by overall sales | Numerator and denominator must share the intended filter context |
+| Total sales | SUM(sales_amount) | Confirm currency, tax, discount, and additive treatment in the source model. |
+| Total quantity | SUM(quantity) | Assumes units are comparable across the aggregated rows. |
+| Distinct orders | COUNT(DISTINCT order_number) | The fact is at order-line grain; row count is not order count. |
+| Distinct customers | COUNT(DISTINCT customer_key) | Excludes null customer keys. |
+| Customer average order value | Customer sales / customer's distinct orders | Average sales per order for that customer. |
+| Product sales per order | Product sales / distinct orders containing that product | Not the overall basket value of those orders. |
+| Weighted sales per unit | Total sales / total quantity | Quantity-weighted calculation; confirm discount and tax treatment. |
+| Month-boundary recency | DATEDIFF(MONTH, last_order_date, as_of_date) | Counts month boundaries, not completed 30-day periods. |
+| Sales activity month span | DATEDIFF(MONTH, first_order_date, last_order_date) + 1 | Inclusive calendar-month span between first and last dated orders; not the number of months with purchases. |
+| Average sales per calendar month in span | Total sales / sales activity month span | Includes calendar months with no orders inside the span. |
+| Category contribution | Category sales / overall sales | Numerator and denominator must use the intended filter context. |
 
 Use numeric results in SQL and apply display formatting in the presentation layer.
 
-## 2. Segmentation rules implemented
+## 2. Classification assumptions
 
-The scripts currently use these learning-project thresholds:
+The following thresholds are explicit learning-project assumptions. They are not universal customer policies or externally approved commercial rules.
 
 ### Product cost bands
 
-- Below 100
-- 100 to less than 500
-- 500 to 1,000 inclusive
-- Above 1,000
-- Unknown cost where cost is NULL
+| Segment | Rule |
+|---|---|
+| Below 100 | Cost < 100 |
+| 100 to under 500 | Cost >= 100 and < 500 |
+| 500 to 1,000 | Cost >= 500 and <= 1,000 |
+| Above 1,000 | Cost > 1,000 |
+| Unknown Cost | Cost is NULL |
 
-These ranges are continuous at the boundary values. Negative costs should be treated as a source-data exception and investigated if they appear.
+The ranges are continuous at their boundaries. Negative costs should be investigated as source-data exceptions if present.
 
 ### Customer segments
 
-- **VIP:** total sales at least 5,000 and at least 12 active calendar months.
-- **Regular:** total sales at least 1,000 and at least 12 active calendar months.
+- **VIP:** total sales of at least 5,000 and a sales activity month span of at least 12.
+- **Regular:** total sales of at least 1,000 and a sales activity month span of at least 12.
 - **New:** all other customers included in the sales-driven analysis.
 
-These are illustrative portfolio assumptions, not universal customer policies or externally approved business rules. Change them only with a documented business rationale.
+The label **New** is the residual bucket in this exercise; it does not prove that a customer was newly acquired. The span condition is based on first and last dated order months, not the number of months with an order.
 
-### Product performance bands
+### Product revenue performance bands
 
-- High Performance: total sales greater than 50,000.
-- Medium Performance: total sales from 10,000 through 50,000 inclusive.
-- Low Performance: total sales below 10,000.
-
-Thresholds should be calibrated to the business context before they are used for management decisions.
-
-## 3. Important SQL interpretation points
-
-| Area | Correct interpretation |
+| Segment | Rule |
 |---|---|
-| Cumulative total | The all-time running total is ordered by month without partitioning by that same month. A separate year-to-date example partitions by year deliberately. |
-| Ranking | Descending revenue returns top-N; ascending revenue returns bottom-N. |
-| `LAG()` | Compares with the previous available row in the ordered set, not automatically the previous calendar year. |
-| Customer age | The report adjusts the year difference for whether the birthday has occurred. |
-| Month lifespan | `DATEDIFF(MONTH)` counts month boundaries; the scripts use an inclusive calendar-month definition by adding one. |
-| Average per unit | The product report uses total sales divided by total quantity, which is weighted by quantity. |
-| Average per order | Total sales divided by distinct orders. |
-| Average monthly sales | Total sales divided by inclusive active calendar months. |
-| Customer/product coverage | The current reports are fact-driven and exclude entities with no dated sales activity. |
-| Dynamic recency and age | These fields use the current system date and will change when the view is queried later. |
+| High Performance | Total sales > 50,000 |
+| Medium Performance | Total sales >= 10,000 and <= 50,000 |
+| Low Performance | Total sales < 10,000 |
 
-## 4. Validation checklist
+These bands measure sales revenue only. They do not measure profit, margin, unit economics, or growth. Calibrate thresholds to a business context before using them for management decisions.
+
+## 3. SQL interpretation notes
+
+| Area | Interpretation |
+|---|---|
+| Running total | The all-time running total is ordered by month without partitioning by that same month. The separate year-to-date example partitions by year deliberately. |
+| Ranking | Descending revenue returns the highest values; ascending revenue returns the lowest values. |
+| LAG() | Returns the previous available row in the ordered set. It is not necessarily the previous calendar year when periods are missing. |
+| Customer age | The expression adjusts the year difference for whether the birthday has occurred by the as-of date. |
+| Calendar-month span | DATEDIFF(MONTH) + 1 measures the inclusive calendar-month span. It is not an active-month count. |
+| Weighted sales per unit | Total sales divided by total quantity; not the unweighted average of row-level prices. |
+| Customer/product coverage | Reports require a non-null order date and a matching key in the relevant dimension. |
+| Dynamic fields | Age and month-boundary recency use the current system date and change over time. |
+
+## 4. Source coverage and join behaviour
+
+The upstream fact view uses left joins to customer and product dimensions. A fact row can have a null dimension key if the source key has no match.
+
+The customer report joins the customer dimension and therefore excludes fact rows without a matching customer. The product report joins the product dimension and therefore excludes fact rows without a matching product. The upstream product dimension contains current products only; historical sales for discontinued or otherwise absent products may not have a product match.
+
+The validation script reports unmatched fact rows and their sales amounts separately from report reconciliations. A reconciliation that uses inner joins validates the mapped reporting population; it does not, by itself, prove that every source fact row is represented.
+
+## 5. Validation checklist
 
 ### Data model and joins
-
-- Confirm the sales fact's sales-line grain.
-- Check customer and product dimension key uniqueness.
+- Confirm the sales fact's order-line grain.
+- Check customer and product dimension-key uniqueness.
+- Identify fact rows with null or unmatched customer and product keys.
 - Compare row counts before and after joins.
-- Check for unmatched dimension keys.
-- Confirm no unintended many-to-many relationship multiplies sales rows.
+- Investigate unexpected row multiplication or unmatched dimension keys.
 
 ### Aggregations
-
-- Reconcile total sales and quantity to the fact table.
-- Compare distinct order counts with known order-level results.
-- Verify grouping columns match the intended grain.
+- Reconcile total sales and quantity to the defined source population.
+- Compare distinct order counts with independent order-level results.
+- Verify that grouping columns match the intended output grain.
 - Test tied values in ranking queries.
-- Check empty groups and null measure behaviour.
+- Check empty groups and null-measure behaviour.
 
 ### Calculations
-
-- Use `NULLIF(denominator, 0)` where division by zero is possible.
-- Check decimal precision and integer division.
+- Use NULLIF(denominator, 0) where division by zero is possible.
+- Check decimal precision and integer-division behaviour.
 - Keep ratios numeric until presentation.
 - Verify date logic around year-end, month-end, and birthdays.
-- Test values exactly below, at, and above segmentation thresholds.
+- Test values immediately below, at, and above segmentation boundaries.
 
 ### Reporting views
-
-- Confirm the view compiles against the target SQL Server schema.
+- Confirm the views compile against the target SQL Server schema.
 - Verify one row per intended customer or product key.
-- Check column names and data types.
-- Reconcile key metrics to independently written validation queries.
-- Record the date used for dynamic recency calculations.
+- Check output column names and data types.
+- Reconcile the mapped sales population to the relevant report.
+- Record the as-of date used for dynamic recency and age fields.
 
-## 5. Validation status
+## 6. Validation status
 
-The SQL checks are committed in `tests/validate_reporting_views.sql`. They have not yet been run against the target SQL Server database in this workflow. Once executed, record the SQL Server version, run date, actual result counts, reconciliation differences, and any accepted exceptions here.
+The checks are committed in [tests/validate_reporting_views.sql](../tests/validate_reporting_views.sql). They have not yet been executed against the target SQL Server instance in this repository workflow.
 
-Do not publish invented row counts, performance claims, or business findings.
+After execution, record the SQL Server version, execution date, returned row counts, reconciliation differences, unmatched-key counts, and accepted exceptions. Do not publish unverified row counts, performance claims, or business findings.
