@@ -1,10 +1,12 @@
-# Reporting
+# Reporting — Scripts 12–13
 
-This folder is reserved for the final reporting-view definitions:
+The reporting layer contains two SQL Server views, each with a defined entity-level grain.
 
-- Customer report: customer-level sales, order activity, recency, age groups, and customer segments.
-- Product report: product-level sales, order/customer counts, recency, and performance categories.
+| Script | View | Grain |
+|---|---|---|
+| 12 | `gold.report_customers` | One row per customer with at least one dated sales record |
+| 13 | `gold.report_products` | One row per product with at least one dated sales record |
 
-The intended SQL Server objects are the customer and product reporting views described in the root README.
+The scripts use `CREATE OR ALTER VIEW` so they can be re-run to update the view definitions. Run the validation script in `tests/validate_reporting_views.sql` after creating both views.
 
-**Current status:** Reporting scope documented; executable view definitions and validation queries are not yet committed. Confirm the source schema and business thresholds before treating the reports as final.
+**Important:** These reports are fact-driven. Customers and products with no dated sales are not included.
