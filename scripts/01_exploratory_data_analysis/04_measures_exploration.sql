@@ -26,11 +26,13 @@ GO
 -- This is total sales divided by total units, not an unweighted average
 -- of individual row-level sales/quantity ratios.
 SELECT
-    SUM(sales_amount) AS total_sales,
-    SUM(quantity) AS total_quantity,
-    SUM(sales_amount) / NULLIF(SUM(quantity), 0) AS weighted_average_sales_per_unit
+    SUM(CONVERT(decimal(19, 4), sales_amount)) AS total_sales,
+    SUM(CONVERT(decimal(19, 4), quantity)) AS total_quantity,
+    SUM(CONVERT(decimal(19, 4), sales_amount))
+        / NULLIF(SUM(CONVERT(decimal(19, 4), quantity)), 0) AS weighted_average_sales_per_unit
 FROM gold.fact_sales
-WHERE quantity IS NOT NULL;
+WHERE quantity IS NOT NULL
+  AND sales_amount IS NOT NULL;
 GO
 
 -- 3. Dimension counts.
