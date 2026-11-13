@@ -1,48 +1,42 @@
 # SQL Advanced Analytics
 
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-red)](https://www.microsoft.com/sql-server)
-[![Focus](https://img.shields.io/badge/Focus-Business%20Analytics-blue)](#project-overview)
-[![Status](https://img.shields.io/badge/Status-SQL%20added%20%7C%20validation%20pending-orange)](#current-delivery-status)
-[![Learning reference](https://img.shields.io/badge/Learning%20reference-Data%20With%20Baraa-F5B301)](https://github.com/DataWithBaraa/sql-data-analytics-project)
+[![Scripts](https://img.shields.io/badge/SQL%20scripts-13-blue)](#repository-structure)
+[![Focus](https://img.shields.io/badge/Focus-Business%20Analytics-2f6f9f)](#project-overview)
+[![Validation](https://img.shields.io/badge/Validation-Execution%20pending-orange)](#quality-assurance-and-status)
 
-A SQL Server analytics portfolio project demonstrating how a dimensional data model can be explored and transformed into business-focused analysis and reusable reporting views.
+A Microsoft SQL Server portfolio project that applies analytical SQL to a dimensional sales model. It progresses from data exploration to time-series analysis, ranking, cumulative metrics, segmentation, and reusable customer and product reporting views.
 
-The work covers exploratory data analysis, time-based analysis, cumulative metrics, performance comparisons, contribution analysis, customer/product segmentation, and reporting. It is designed to show not only how SQL statements work, but **why a particular analytical method is appropriate, what each result means, and how its correctness should be checked**.
+The emphasis is on **business meaning, correct aggregation grain, explicit metric definitions, and validation**—not simply demonstrating SQL syntax.
 
-> **Portfolio transparency:** This repository now includes a complete working set of 13 documented T-SQL scripts reconstructed from the queries and business logic discussed during development and aligned to the Gold Layer schema in the linked warehouse repository. These are organised portfolio versions, not a byte-for-byte copy of the original local scripts. They have not yet been executed in the user's SQL Server environment; the included validation script must be run and its results reviewed before claiming end-to-end verification.
+## Project at a glance
 
-## Project overview
+| Area | Details |
+|---|---|
+| Database platform | Microsoft SQL Server |
+| Language | T-SQL |
+| Source database | DATAWAREHOUSE |
+| Source objects | GOLD.FACT_SALES, GOLD.DIM_CUSTOMERS, GOLD.DIM_PRODUCTS |
+| Analytical scope | 12 topics across 13 SQL scripts |
+| Reporting outputs | GOLD.REPORT_CUSTOMERS, GOLD.REPORT_PRODUCTS |
+| Downstream use | SQL analysis and Power BI reporting |
 
-### Business context
+**Related data foundation:** [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project)
 
-A business has sales transactions linked to customer and product dimensions. Decision-makers need consistent answers to questions about revenue, order activity, customer behaviour, product performance, and changes over time.
+## Business problem
 
-This project uses SQL to move from row-level sales data to analytical outputs that can support business review and dashboard development.
+Sales data is stored at transaction-line level, while business users often need customer-, product-, category-, and time-based measures. The project develops a repeatable SQL workflow to answer questions such as:
 
-### Questions explored
-
-- Which product categories and products contribute the most and least revenue?
-- How do sales, quantities, and order activity change over time?
-- How does current product performance compare with a product's historical average or previous available year?
-- What percentage of total revenue is contributed by each category?
-- How can products be grouped into cost bands?
-- How can customers be grouped using purchasing value and activity lifespan?
-- Which customer and product measures belong in reusable reporting views?
-
-### Intended outcome
-
-Two reporting outputs form the reporting stage:
-
-- **Customer report:** customer-level sales, order activity, recency, lifespan, age grouping, and customer segmentation.
-- **Product report:** product-level sales, quantity, order/customer counts, recency, and product performance classification.
-
-The views are intended as a consistent SQL layer for further analysis or Power BI consumption. The precise formulas and business thresholds are documented in the scripts and validation notes.
+- Which products and categories contribute the most revenue?
+- How do sales, units, orders, and active customers change over time?
+- Which products perform above or below their historical average?
+- What share of revenue comes from each product category?
+- How can products be grouped by cost and customers by purchasing behaviour?
+- Which measures should be exposed in reusable customer and product reports?
 
 ## Analytical workflow
 
-The project is organised into 12 topics in two stages. The reporting topic produces two separate views, so the repository contains 13 numbered SQL scripts.
-
-### Stage 1 — Exploratory Data Analysis
+### 1. Exploratory data analysis
 
 | # | Topic | Script |
 |---:|---|---|
@@ -53,7 +47,7 @@ The project is organised into 12 topics in two stages. The reporting topic produ
 | 05 | Magnitude analysis | [05_magnitude_analysis.sql](scripts/01_exploratory_data_analysis/05_magnitude_analysis.sql) |
 | 06 | Ranking analysis | [06_ranking_analysis.sql](scripts/01_exploratory_data_analysis/06_ranking_analysis.sql) |
 
-### Stage 2 — Advanced Data Analytics
+### 2. Advanced analytics
 
 | # | Topic | Script |
 |---:|---|---|
@@ -62,134 +56,101 @@ The project is organised into 12 topics in two stages. The reporting topic produ
 | 09 | Performance analysis | [09_performance_analysis.sql](scripts/02_advanced_analytics/09_performance_analysis.sql) |
 | 10 | Part-to-whole analysis | [10_part_to_whole_analysis.sql](scripts/02_advanced_analytics/10_part_to_whole_analysis.sql) |
 | 11 | Data segmentation | [11_data_segmentation.sql](scripts/02_advanced_analytics/11_data_segmentation.sql) |
-| 12 | Customer reporting | [12_report_customers.sql](scripts/03_reporting/12_report_customers.sql) |
-| 13 | Product reporting | [13_report_products.sql](scripts/03_reporting/13_report_products.sql) |
 
-The two reporting deliverables are grouped under the single Reporting topic in the 12-topic learning roadmap.
+### 3. Reporting
 
-## Data model and analytical grain
+The Reporting topic produces two separate views:
 
-The analysis consumes the Gold Layer of a separate dimensional warehouse project:
-
-| Entity | Role | Analytical purpose |
+| Script | View | Output grain |
 |---|---|---|
-| `gold.fact_sales` | Fact view | Sales transaction lines and measures |
-| `gold.dim_customers` | Dimension view | Customer attributes used for grouping and filtering |
-| `gold.dim_products` | Dimension view | Product, category, subcategory, and cost attributes |
+| [12_report_customers.sql](scripts/03_reporting/12_report_customers.sql) | GOLD.REPORT_CUSTOMERS | One row per customer with qualifying dated sales |
+| [13_report_products.sql](scripts/03_reporting/13_report_products.sql) | GOLD.REPORT_PRODUCTS | One row per product with qualifying dated sales |
 
-The fact view is at **sales-line grain**: one row represents a product line within an order. Therefore, row count and order count are not interchangeable. The scripts use `COUNT(DISTINCT order_number)` when the question asks for distinct orders.
+## Data model and grain
 
-The fact view links to customers with `customer_key` and products with `product_key`. The following diagram shows the analytical flow:
+The project consumes the Gold Layer from the related data warehouse repository.
 
-```mermaid
-flowchart TD
-    A[Gold Layer: Fact + Dimensions] --> B[Base Query: Joins and Selection]
-    B --> C[Transformations and Business Rules]
-    C --> D[Aggregation to Customer / Product Grain]
-    D --> E[Enrichment: Ratios, Recency, Segments]
-    E --> F[Customer and Product SQL Views]
-    F --> G[Power BI / Reporting / Business Analysis]
-```
+| Object | Role | Key fields |
+|---|---|---|
+| GOLD.FACT_SALES | Sales fact view | ORDER_NUMBER, PRODUCT_KEY, CUSTOMER_KEY, ORDER_DATE, SALES_AMOUNT, QUANTITY |
+| GOLD.DIM_CUSTOMERS | Customer dimension | CUSTOMER_KEY, CUSTOMER_ID, customer attributes |
+| GOLD.DIM_PRODUCTS | Product dimension | PRODUCT_KEY, PRODUCT_ID, product hierarchy and cost |
 
-See [the architecture guide](docs/architecture.md) for the detailed explanation and fact/dimension relationship diagram.
+The sales fact is at **order-line grain**: one row represents a product line within an order. An order can therefore appear on multiple rows. The analysis uses distinct order numbers when the required measure is the number of orders.
 
-## Methods and SQL capabilities
+The upstream fact view uses left joins to the dimensions. A fact row can therefore have a missing dimension key when no matching dimension record exists. The reporting views use inner joins and include only fact rows with a matching dimension record and a non-null order date. The validation workflow makes this scope visible rather than silently treating unmatched rows as included.
 
-- Joins, filtering, and relational exploration
-- Aggregations and grouping with `GROUP BY`
-- Common Table Expressions (CTEs) and derived tables
-- Ranking with `ROW_NUMBER()` and `RANK()`
-- Window aggregates with `SUM() OVER()` and `AVG() OVER()`
-- Period comparisons with `LAG()`
-- Date grouping and calculations with `YEAR()`, `MONTH()`, `DATEDIFF()`, and `DATEFROMPARTS()`
-- Conditional classification using `CASE`
-- Reusable reporting logic through SQL Server views
+The product dimension in the upstream warehouse contains current products. Historical sales for products not represented in that current-product dimension may not have a matching product key.
 
-## Reporting design
+See [the architecture guide](docs/architecture.md) for the workflow and relationship diagrams.
 
-The reporting pattern is:
+## SQL methods demonstrated
 
-1. **Base dataset:** join the fact view with the relevant dimensions and select required columns.
-2. **Transformation:** derive or standardise fields using documented business rules.
-3. **Aggregation:** group to the reporting grain, such as one row per customer or product.
-4. **Enrichment:** calculate ratios, recency, lifespan, and classifications.
-5. **Reporting view:** expose the final result through a reusable SQL Server view.
+- Schema and dimensional exploration
+- Joins, filters, aggregates, and grouped analysis
+- Common Table Expressions (CTEs)
+- Ranking with ROW_NUMBER() and RANK()
+- Window aggregates with SUM() OVER() and AVG() OVER()
+- Period comparisons with LAG()
+- Date grouping and calculations with DATEFROMPARTS(), YEAR(), MONTH(), and DATEDIFF()
+- Conditional business rules using CASE
+- Reusable reporting logic using CREATE OR ALTER VIEW
 
-A normal SQL Server view stores a query definition; it does not automatically store a materialised copy of the result.
+## Selected analytical design decisions
+
+- **Order counting:** distinct order numbers are used because the fact is at order-line grain.
+- **Cumulative metrics:** the all-time running total is ordered by month; the separate year-to-date example resets by year.
+- **Period comparisons:** LAG() is described as comparing with the previous available period. Missing calendar years are not assumed to be zero.
+- **Calendar-month span:** the inclusive span between first and last order months is distinguished from the count of months in which purchases actually occurred.
+- **Weighted unit sales:** product-level sales per unit is calculated as total sales divided by total quantity.
+- **Business classifications:** customer and product thresholds are explicit portfolio assumptions, not universal business policies.
+- **Unmatched dimensions:** missing customer/product mappings are surfaced as a validation concern.
+
+Metric formulas and assumptions are recorded in [Business Rules and Validation](docs/business-rules-and-validation.md).
+
+## Quality assurance and status
+
+The repository includes a validation script for reporting grain, dimension-key uniqueness, unmatched fact keys, source-to-report reconciliation, and entity-level metric comparisons.
+
+**Current status:** the scripts and validation checks are committed, but execution against the target SQL Server instance and review of the resulting reconciliation outputs are still pending. No runtime, row-count, or business-performance claims are made until they are supported by execution evidence.
+
+The committed SQL files are curated portfolio versions of the analytical work. Compare them with any local working copies before treating this repository as the canonical execution copy.
 
 ## Setup and execution
 
-The analytics repository depends on the Gold Layer from the separate [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project). It does not recreate or drop the warehouse database.
+1. Build or restore the upstream [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project).
+2. Confirm that DATAWAREHOUSE contains the three Gold Layer views listed above.
+3. Execute scripts 01–11 in numerical order.
+4. Execute scripts 12 and 13 to create the reporting views.
+5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) and investigate all returned exceptions.
 
-Follow [docs/setup-and-execution.md](docs/setup-and-execution.md) for prerequisites and execution order. In brief:
-
-1. Restore or build the upstream `DataWarehouse` database.
-2. Confirm the three Gold Layer views and expected columns exist.
-3. Run scripts 01–11 in numerical order.
-4. Run scripts 12 and 13 to create the customer and product reports.
-5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) and investigate any differences.
+See [Setup and Execution](docs/setup-and-execution.md) for prerequisites, details, and expected validation behaviour.
 
 ## Repository structure
 
-```text
-sql-advanced-analytics/
-├── scripts/
-│   ├── 01_exploratory_data_analysis/  # Scripts 01–06
-│   ├── 02_advanced_analytics/         # Scripts 07–11
-│   └── 03_reporting/                 # Scripts 12–13
-├── tests/
-│   └── validate_reporting_views.sql
-├── docs/
-│   ├── architecture.md
-│   ├── analytics-workflow.md
-│   ├── business-rules-and-validation.md
-│   ├── interview-guide.md
-│   ├── setup-and-execution.md
-│   └── README.md
-└── README.md
-```
+    sql-advanced-analytics/
+    ├── scripts/
+    │   ├── 01_exploratory_data_analysis/  # Scripts 01–06
+    │   ├── 02_advanced_analytics/         # Scripts 07–11
+    │   └── 03_reporting/                  # Scripts 12–13
+    ├── tests/
+    │   └── validate_reporting_views.sql
+    ├── docs/
+    │   ├── architecture.md
+    │   ├── analytics-workflow.md
+    │   ├── business-rules-and-validation.md
+    │   ├── project-walkthrough.md
+    │   └── setup-and-execution.md
+    └── README.md
 
-## Quality and analytical controls
+## Documentation
 
-The scripts and validation guide address:
-
-- Join cardinality and unintended row multiplication
-- Reporting grain and one-row-per-entity expectations
-- Reconciliation of aggregate totals to source data
-- Null, zero, and missing-date handling
-- Division-by-zero protection
-- Date boundary behaviour and recency definitions
-- Consistent segment thresholds and correctly named metrics
-
-The report validation script includes duplicate-grain checks, source-to-report sales reconciliation, and entity-level comparisons using `EXCEPT`.
-
-## Technology and prerequisites
-
-- Microsoft SQL Server and T-SQL
-- SQL Server Management Studio (SSMS) or an equivalent SQL editor
-- Access to the upstream Gold Layer views
-- Git and GitHub
-
-The scripts use SQL Server-specific syntax. Confirm SQL Server version compatibility for date functions and view syntax before running.
+- [Analytical Architecture](docs/architecture.md)
+- [Analytics Workflow](docs/analytics-workflow.md)
+- [Business Rules, Metric Definitions, and Validation](docs/business-rules-and-validation.md)
+- [Project Walkthrough](docs/project-walkthrough.md)
+- [Setup and Execution](docs/setup-and-execution.md)
 
 ## Learning reference and attribution
 
-The learning roadmap is inspired by [Data With Baraa — SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project), which publishes the educational project structure, datasets, and example scripts. This repository is a separate personal portfolio workspace and is not affiliated with or endorsed by the original author. The scripts here are documented working versions written for the Gold Layer schema in the linked personal Data Warehouse repository, based on the queries and analytical rules discussed during development. The original learning reference should be acknowledged when presenting this work.
-
-## Interview preparation
-
-Use [docs/interview-guide.md](docs/interview-guide.md) to prepare a concise project explanation and technical walkthrough. Be ready to explain the fact grain, join logic, metric definitions, edge cases, and validation process. Do not describe the scripts as executed or validated until you have run them in SQL Server and reviewed the outputs.
-
-## Current delivery status
-
-| Deliverable | Status |
-|---|---|
-| Project overview and architecture documentation | Committed |
-| 13 documented T-SQL analysis/reporting scripts | Committed; execution pending |
-| Reporting validation script | Committed; execution pending |
-| Interview and metric-definition guides | Committed |
-| SQL Server execution and reconciliation evidence | Pending |
-
-## Related project
-
-[SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) builds the Bronze/Silver/Gold data foundation. This repository focuses on consuming the Gold Layer for business analytics and reporting.
+The learning roadmap was informed by [Data With Baraa — SQL Data Analytics Project](https://github.com/DataWithBaraa/sql-data-analytics-project). This repository is a separate personal portfolio project and is not affiliated with or endorsed by the original author. The learning reference is acknowledged; the SQL scripts here are organised for the Gold Layer schema in the related data warehouse repository.
