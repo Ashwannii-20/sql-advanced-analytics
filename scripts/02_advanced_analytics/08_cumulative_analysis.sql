@@ -6,6 +6,9 @@
     Important: the window is ordered by month and is not partitioned by
     month. Partitioning by the month would restart the cumulative total
     inside every month and would not produce a year-to-date/all-time run.
+
+    Only months containing fact rows are returned. The cumulative average
+    is calculated across observed months, not a calendar-complete series.
 */
 
 USE DataWarehouse;
@@ -30,7 +33,7 @@ SELECT
     AVG(CONVERT(decimal(19, 4), monthly_sales)) OVER (
         ORDER BY month_start
         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-    ) AS cumulative_average_monthly_sales
+    ) AS cumulative_average_sales_per_observed_month
 FROM monthly_sales
 ORDER BY month_start;
 GO
