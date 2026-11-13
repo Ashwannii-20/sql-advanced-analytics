@@ -3,7 +3,7 @@
     Script  : 11 - Data Segmentation
     Purpose : Group products by cost and customers by purchasing behaviour.
 
-    The thresholds below are explicit analytical rules for this exercise.
+    The thresholds below are explicit analytical assumptions for this exercise. The span condition measures the inclusive first-to-last order month range, not the number of months with purchases.
     They should be confirmed with a business owner before operational use.
 */
 
@@ -44,7 +44,7 @@ ORDER BY
     END;
 GO
 
--- 2. Customer segmentation by sales value and active calendar months.
+-- 2. Customer segmentation by sales value and sales activity month span.
 -- Only customers with at least one dated sales record are included.
 WITH customer_purchase_summary AS
 (
@@ -57,7 +57,7 @@ WITH customer_purchase_summary AS
         COUNT(DISTINCT f.order_number) AS total_orders,
         SUM(f.sales_amount) AS total_sales,
         SUM(f.quantity) AS total_quantity,
-        DATEDIFF(MONTH, MIN(f.order_date), MAX(f.order_date)) + 1 AS active_calendar_months
+        DATEDIFF(MONTH, MIN(f.order_date), MAX(f.order_date)) + 1 AS sales_activity_month_span
     FROM gold.fact_sales AS f
     INNER JOIN gold.dim_customers AS c
         ON f.customer_key = c.customer_key
@@ -73,8 +73,8 @@ segmented_customers AS
     SELECT
         *,
         CASE
-            WHEN total_sales >= 5000 AND active_calendar_months >= 12 THEN 'VIP'
-            WHEN total_sales >= 1000 AND active_calendar_months >= 12 THEN 'Regular'
+            WHEN total_sales >= 5000 AND sales_activity_month_span >= 12 THEN 'VIP'
+            WHEN total_sales >= 1000 AND sales_activity_month_span >= 12 THEN 'Regular'
             ELSE 'New'
         END AS customer_segment
     FROM customer_purchase_summary
@@ -106,7 +106,7 @@ WITH customer_purchase_summary AS
         MAX(f.order_date) AS last_order_date,
         COUNT(DISTINCT f.order_number) AS total_orders,
         SUM(f.sales_amount) AS total_sales,
-        DATEDIFF(MONTH, MIN(f.order_date), MAX(f.order_date)) + 1 AS active_calendar_months
+        DATEDIFF(MONTH, MIN(f.order_date), MAX(f.order_date)) + 1 AS sales_activity_month_span
     FROM gold.fact_sales AS f
     INNER JOIN gold.dim_customers AS c
         ON f.customer_key = c.customer_key
@@ -120,8 +120,8 @@ WITH customer_purchase_summary AS
 SELECT
     *,
     CASE
-        WHEN total_sales >= 5000 AND active_calendar_months >= 12 THEN 'VIP'
-        WHEN total_sales >= 1000 AND active_calendar_months >= 12 THEN 'Regular'
+        WHEN total_sales >= 5000 AND sales_activity_month_span >= 12 THEN 'VIP'
+        WHEN total_sales >= 1000 AND sales_activity_month_span >= 12 THEN 'Regular'
         ELSE 'New'
     END AS customer_segment
 FROM customer_purchase_summary
