@@ -2,15 +2,15 @@
     Project : SQL Advanced Analytics
     Script  : 12 - Customer Report
     Output  : gold.report_customers
-    Grain   : One row per customer with at least one dated sales record.
+    Grain   : One row per customer with dated sales and a matching customer dimension record.
 
     Metric definitions:
       - total_orders: distinct order numbers, not sales-line count.
-      - active_calendar_months: inclusive count of calendar months between
+      - sales_activity_month_span: inclusive count of calendar months between
         first and last dated orders.
       - average_order_value: total sales / distinct orders.
-      - average_monthly_sales: total sales / active calendar months.
-      - recency_months: month boundaries since the last dated order.
+      - average_sales_per_calendar_month_in_span: total sales / sales activity month span.
+      - months_since_last_order_month_boundary: month boundaries since the last dated order.
 
     Customer age and recency use the current system date; outputs therefore
     change over time. Change the reference-date design if a fixed reporting
@@ -78,8 +78,8 @@ customer_metrics AS
 (
     SELECT
         *,
-        DATEDIFF(MONTH, first_order_date, last_order_date) + 1 AS active_calendar_months,
-        DATEDIFF(MONTH, last_order_date, CONVERT(date, GETDATE())) AS recency_months,
+        DATEDIFF(MONTH, first_order_date, last_order_date) + 1 AS sales_activity_month_span,
+        DATEDIFF(MONTH, last_order_date, CONVERT(date, GETDATE())) AS months_since_last_order_month_boundary,
         CASE
             WHEN birthdate IS NULL OR birthdate > CONVERT(date, GETDATE()) THEN NULL
             ELSE
@@ -116,17 +116,17 @@ SELECT
     END AS age_group,
     first_order_date,
     last_order_date,
-    active_calendar_months,
-    recency_months,
+    sales_activity_month_span,
+    months_since_last_order_month_boundary,
     total_orders,
     distinct_products,
     total_quantity,
     total_sales,
-    total_sales / NULLIF(CONVERT(decimal(18, 2), total_orders), 0) AS average_order_value,
-    total_sales / NULLIF(CONVERT(decimal(18, 2), active_calendar_months), 0) AS average_monthly_sales,
+    CONVERT(decimal(19, 4), total_sales) / NULLIF(CONVERT(decimal(19, 4), total_orders), 0) AS average_order_value,
+    CONVERT(decimal(19, 4), total_sales) / NULLIF(CONVERT(decimal(19, 4), sales_activity_month_span), 0) AS average_sales_per_calendar_month_in_span,
     CASE
-        WHEN total_sales >= 5000 AND active_calendar_months >= 12 THEN 'VIP'
-        WHEN total_sales >= 1000 AND active_calendar_months >= 12 THEN 'Regular'
+        WHEN total_sales >= 5000 AND sales_activity_month_span >= 12 THEN 'VIP'
+        WHEN total_sales >= 1000 AND sales_activity_month_span >= 12 THEN 'Regular'
         ELSE 'New'
     END AS customer_segment
 FROM customer_metrics;
