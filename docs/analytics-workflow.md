@@ -1,52 +1,52 @@
-# Analytics Workflow — Topic Guide
+# Analytics Workflow
 
-This guide describes the purpose of each of the 12 analysis topics in the repository.
+This guide explains the purpose of each analytical topic and the business question it supports.
 
 ## Stage 1 — Exploratory Data Analysis
 
-### 01. Database Exploration
-Understand the available schemas, tables, columns, and relationships. The goal is to learn what data exists before writing business analysis.
+### 01. Database exploration
+Inspect schemas, objects, columns, data types, and row counts. Establish the structure of the Gold Layer before writing analytical queries.
 
-### 02. Dimensions Exploration
-Inspect descriptive attributes and their distinct values. Examples include customer country, gender, product category, and subcategory.
+### 02. Dimensions exploration
+Review descriptive attributes and distinct values, including customer geography and profile fields and the product hierarchy. Identify missing or inconsistent labels.
 
-### 03. Date Exploration
-Inspect minimum and maximum dates, date coverage, and date ranges. Date coverage is important before comparing periods or calculating customer age and lifespan.
+### 03. Date range exploration
+Establish sales date coverage and inspect missing dates, customer birthdates, and product start dates. Apply completed-age logic rather than relying only on a year-boundary difference.
 
-### 04. Measures Exploration
-Identify the key numerical measures and calculate baseline metrics such as revenue, quantity, average price, order count, product count, and customer count.
+### 04. Measures exploration
+Calculate baseline sales, quantity, order, customer, and product measures. Distinguish transaction-line counts from distinct order counts.
 
-### 05. Magnitude Analysis
-Compare measures across business dimensions. Examples include revenue by category, customers by country, and spending by customer.
+### 05. Magnitude analysis
+Compare measures across business dimensions, including category revenue, customer geography, product counts, and customer spending.
 
-### 06. Ranking Analysis
-Identify the highest- and lowest-performing entities using sorting and ranking functions. Check sort direction carefully: ascending order returns the smallest values first.
+### 06. Ranking analysis
+Identify top- and bottom-performing products, subcategories, and customers. Validate sort direction and define a tie-handling approach.
 
-## Stage 2 — Advanced Data Analytics
+## Stage 2 — Advanced Analytics
 
-### 07. Change-over-Time Analysis
-Aggregate measures by month, quarter, or year to understand trends. Use date data types for sorting and grouping where possible; formatted strings are usually better suited to presentation.
+### 07. Change-over-time analysis
+Aggregate sales and activity by month and year. Use date values for chronological grouping and sorting.
 
-### 08. Cumulative Analysis
-Calculate running totals over an ordered time series. A cumulative window should order by the time period and should not partition by that same period, otherwise the running total resets for each period.
+### 08. Cumulative analysis
+Calculate an all-time running total across monthly periods and a separate year-to-date measure. The all-time window is not partitioned by month; the year-to-date window is partitioned by year intentionally.
 
-### 09. Performance Analysis
-Compare current performance with a benchmark such as an average or a previous period. Functions such as `AVG() OVER()` and `LAG()` help make these comparisons.
+### 09. Performance analysis
+Compare annual product sales with the product's average annual sales and its previous available year. The output identifies the prior available year so missing calendar periods are not mistaken for zero-sales periods.
 
-### 10. Part-to-Whole Analysis
-Measure each category's contribution to an overall total. Keep percentage results numeric in the analytical layer and format them for display later.
+### 10. Part-to-whole analysis
+Calculate category revenue as a percentage of overall revenue. Keep percentages numeric in the SQL layer and apply display formatting downstream.
 
-### 11. Data Segmentation
-Group entities using documented rules, such as product cost bands or customer purchasing segments. Define boundary values carefully so every value belongs to an intentional range.
+### 11. Data segmentation
+Group products into cost bands and customers into purchasing segments. Boundary values are defined explicitly. Thresholds are analytical assumptions and should not be treated as approved commercial policy.
 
 ### 12. Reporting
-Combine the analytical steps into reusable customer and product reporting views. Confirm the grain, calculation definitions, and totals before using the views downstream.
+Create customer- and product-level views using CTEs to separate base selection, aggregation, metric calculation, and classification.
 
-## Review principles
+## Working principles
 
-- Preserve the original query before applying improvements.
-- Use clear aliases and consistent indentation.
-- Make the grain of every aggregate explicit.
-- Keep numeric calculations numeric until the presentation layer.
-- Document business thresholds and edge cases.
-- Validate totals and row counts after joins and aggregations.
+- Establish the row grain before aggregating.
+- Use clear aliases and consistent formatting.
+- Make metric formulas and denominators explicit.
+- Preserve numeric precision through the analytical layer.
+- Document treatment of nulls, zero values, and missing periods.
+- Verify join cardinality and reconcile totals to source data.
