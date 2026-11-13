@@ -1,10 +1,11 @@
-# Documentation
+# Project Documentation
 
-This folder contains the project explanation and interview support material:
+| Document | Description |
+|---|---|
+| [Architecture](architecture.md) | Analytical workflow and fact/dimension relationships |
+| [Analytics workflow](analytics-workflow.md) | Explanation of all 12 learning topics |
+| [Business rules and validation](business-rules-and-validation.md) | Metric definitions, segmentation assumptions, and quality checks |
+| [Interview guide](interview-guide.md) | Project walkthrough and technical interview questions |
+| [Setup and execution](setup-and-execution.md) | Prerequisites, execution order, and validation steps |
 
-- `architecture.md` — analytical data-flow diagram and design explanation
-- `analytics-workflow.md` — purpose of the 12 analysis topics
-- `business-rules-and-validation.md` — metric definitions, known review items, and quality checks
-- `interview-guide.md` — project walkthrough and technical interview questions
-
-The documents describe the intended analytical approach. Executable SQL and measured outputs must be committed separately before the repository can be reproduced end to end.
+The executable T-SQL scripts are stored under `../scripts/`.
