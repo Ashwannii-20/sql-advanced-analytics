@@ -10,6 +10,7 @@ GO
 
 -- 1. Monthly sales trend.
 -- DATEFROMPARTS returns a date value that sorts chronologically.
+-- Only periods with fact rows appear; zero-activity months are not generated.
 SELECT
     DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start,
     SUM(sales_amount) AS monthly_sales,
