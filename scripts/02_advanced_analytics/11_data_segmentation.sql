@@ -3,8 +3,12 @@
     Script  : 11 - Data Segmentation
     Purpose : Group products by cost and customers by purchasing behaviour.
 
-    The thresholds below are explicit analytical assumptions for this exercise. The span condition measures the inclusive first-to-last order month range, not the number of months with purchases.
-    They should be confirmed with a business owner before operational use.
+    The thresholds are illustrative assumptions for this exercise and
+    should be confirmed with a business owner before operational use.
+
+    The customer span is the inclusive first-to-last order month range,
+    not the number of months in which purchases actually occurred.
+    The 'New' label is the residual segment, not proof of recent acquisition.
 */
 
 USE DataWarehouse;
@@ -83,7 +87,7 @@ SELECT
     customer_segment,
     COUNT(*) AS customer_count,
     SUM(total_sales) AS segment_sales,
-    AVG(total_sales) AS average_customer_sales,
+    AVG(CONVERT(decimal(19, 4), total_sales)) AS average_customer_sales,
     AVG(CONVERT(decimal(18, 2), total_orders)) AS average_orders
 FROM segmented_customers
 GROUP BY customer_segment
