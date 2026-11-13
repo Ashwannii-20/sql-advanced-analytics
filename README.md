@@ -15,10 +15,10 @@ The emphasis is on **business meaning, correct aggregation grain, explicit metri
 |---|---|
 | Database platform | Microsoft SQL Server |
 | Language | T-SQL |
-| Source database | DATAWAREHOUSE |
-| Source objects | GOLD.FACT_SALES, GOLD.DIM_CUSTOMERS, GOLD.DIM_PRODUCTS |
+| Source database | `DataWarehouse` |
+| Source objects | `gold.fact_sales`, `gold.dim_customers`, `gold.dim_products` |
 | Analytical scope | 12 topics across 13 SQL scripts |
-| Reporting outputs | GOLD.REPORT_CUSTOMERS, GOLD.REPORT_PRODUCTS |
+| Reporting outputs | `gold.report_customers`, `gold.report_products` |
 | Downstream use | SQL analysis and Power BI reporting |
 
 **Related data foundation:** [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project)
@@ -63,8 +63,8 @@ The Reporting topic produces two separate views:
 
 | Script | View | Output grain |
 |---|---|---|
-| [12_report_customers.sql](scripts/03_reporting/12_report_customers.sql) | GOLD.REPORT_CUSTOMERS | One row per customer with qualifying dated sales |
-| [13_report_products.sql](scripts/03_reporting/13_report_products.sql) | GOLD.REPORT_PRODUCTS | One row per product with qualifying dated sales |
+| [12_report_customers.sql](scripts/03_reporting/12_report_customers.sql) | `gold.report_customers` | One row per customer with qualifying dated sales |
+| [13_report_products.sql](scripts/03_reporting/13_report_products.sql) | `gold.report_products` | One row per product with qualifying dated sales |
 
 ## Data model and grain
 
@@ -72,9 +72,9 @@ The project consumes the Gold Layer from the related data warehouse repository.
 
 | Object | Role | Key fields |
 |---|---|---|
-| GOLD.FACT_SALES | Sales fact view | ORDER_NUMBER, PRODUCT_KEY, CUSTOMER_KEY, ORDER_DATE, SALES_AMOUNT, QUANTITY |
-| GOLD.DIM_CUSTOMERS | Customer dimension | CUSTOMER_KEY, CUSTOMER_ID, customer attributes |
-| GOLD.DIM_PRODUCTS | Product dimension | PRODUCT_KEY, PRODUCT_ID, product hierarchy and cost |
+| `gold.fact_sales` | Sales fact view | ORDER_NUMBER, PRODUCT_KEY, CUSTOMER_KEY, ORDER_DATE, SALES_AMOUNT, QUANTITY |
+| `gold.dim_customers` | Customer dimension | CUSTOMER_KEY, CUSTOMER_ID, customer attributes |
+| `gold.dim_products` | Product dimension | PRODUCT_KEY, PRODUCT_ID, product hierarchy and cost |
 
 The sales fact is at **order-line grain**: one row represents a product line within an order. An order can therefore appear on multiple rows. The analysis uses distinct order numbers when the required measure is the number of orders.
 
@@ -89,18 +89,18 @@ See [the architecture guide](docs/architecture.md) for the workflow and relation
 - Schema and dimensional exploration
 - Joins, filters, aggregates, and grouped analysis
 - Common Table Expressions (CTEs)
-- Ranking with ROW_NUMBER() and RANK()
-- Window aggregates with SUM() OVER() and AVG() OVER()
-- Period comparisons with LAG()
-- Date grouping and calculations with DATEFROMPARTS(), YEAR(), MONTH(), and DATEDIFF()
-- Conditional business rules using CASE
-- Reusable reporting logic using CREATE OR ALTER VIEW
+- Ranking with `ROW_NUMBER()` and `RANK()`
+- Window aggregates with `SUM() OVER()` and `AVG() OVER()`
+- Period comparisons with `LAG()`
+- Date grouping and calculations with `DATEFROMPARTS()`, `YEAR()`, `MONTH()`, and `DATEDIFF()`
+- Conditional business rules using `CASE`
+- Reusable reporting logic using `CREATE OR ALTER VIEW`
 
 ## Selected analytical design decisions
 
 - **Order counting:** distinct order numbers are used because the fact is at order-line grain.
 - **Cumulative metrics:** the all-time running total is ordered by month; the separate year-to-date example resets by year.
-- **Period comparisons:** LAG() is described as comparing with the previous available period. Missing calendar years are not assumed to be zero.
+- **Period comparisons:** `LAG()` is described as comparing with the previous available period. Missing calendar years are not assumed to be zero.
 - **Calendar-month span:** the inclusive span between first and last order months is distinguished from the count of months in which purchases actually occurred.
 - **Weighted unit sales:** product-level sales per unit is calculated as total sales divided by total quantity.
 - **Business classifications:** customer and product thresholds are explicit portfolio assumptions, not universal business policies.
@@ -119,7 +119,7 @@ The committed SQL files are curated portfolio versions of the analytical work. C
 ## Setup and execution
 
 1. Build or restore the upstream [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project).
-2. Confirm that DATAWAREHOUSE contains the three Gold Layer views listed above.
+2. Confirm that `DataWarehouse` contains the three Gold Layer views listed above.
 3. Execute scripts 01–11 in numerical order.
 4. Execute scripts 12 and 13 to create the reporting views.
 5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) and investigate all returned exceptions.
