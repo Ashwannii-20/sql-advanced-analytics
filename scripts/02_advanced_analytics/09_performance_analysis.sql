@@ -7,6 +7,9 @@
     LAG() compares the previous row in the ordered result. If a product
     has no sales in a calendar year, the prior row may not be the prior
     calendar year. The output includes the prior year for transparency.
+
+    The annual average is calculated across years with recorded sales for
+    that product. A zero prior-year denominator produces a NULL percentage.
 */
 
 USE DataWarehouse;
