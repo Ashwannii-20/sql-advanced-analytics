@@ -83,6 +83,42 @@ Before presenting this repository as a reproducible run of the committed scripts
 
 > The sales fact contains 60,398 order lines and 27,659 distinct orders. The customer and product reporting views both total 29,351,258 in sales, compared with 29,356,250 in the full fact table. I traced the 4,992 difference to 19 rows with NULL order dates. Both reporting views intentionally filter out rows without an order date, so the dated fact total reconciles exactly to both reports. I also checked the tested customer and product joins for unmatched keys; both returned zero. I distinguish these completed manual checks from the additional checks in the committed validation script that still require recorded outputs.
 
-## 8. Evidence handling
+## 8. Screenshots
 
-SSMS screenshots were supplied in the project review conversation. This document records their visible results. The screenshots have not been committed as image files in this repository; add the original image files under `docs/images/` and embed them here if a visual evidence gallery is required.
+Original SSMS screenshots, taken 14 November 2026. Click any image to open it full size.
+
+### 01. Fact-table baseline: 60,398 rows, 29,356,250 sales, 60,423 units, 27,659 orders
+
+![Fact-table baseline: 60,398 rows, 29,356,250 sales, 60,423 units, 27,659 orders](images/evidence/01-fact-table-baseline.png)
+
+### 02. Fact rows with no matching customer key: 0
+
+![Fact rows with no matching customer key: 0](images/evidence/02-unmatched-customer-keys.png)
+
+### 03. Duplicate product keys in the product dimension: no rows
+
+![Duplicate product keys in the product dimension: no rows](images/evidence/03-duplicate-product-keys.png)
+
+### 04. Fact rows with no matching product key: 0
+
+![Fact rows with no matching product key: 0](images/evidence/04-unmatched-product-keys.png)
+
+### 05. Product report view preview
+
+![Product report view preview](images/evidence/05-product-report-preview.png)
+
+### 06. Customer report view preview
+
+![Customer report view preview](images/evidence/06-customer-report-preview.png)
+
+### 07. Fact vs customer report vs product report totals
+
+![Fact vs customer report vs product report totals](images/evidence/07-sales-reconciliation.png)
+
+### 08. 19 rows with a NULL order date, carrying 4,992 in sales
+
+![19 rows with a NULL order date, carrying 4,992 in sales](images/evidence/08-null-order-date-sales.png)
+
+### 09. `order_date IS NOT NULL` found in both view definitions
+
+![`order_date IS NOT NULL` found in both view definitions](images/evidence/09-date-filter-confirmation.png)

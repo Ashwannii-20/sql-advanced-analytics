@@ -114,6 +114,22 @@ The repository includes a validation script for reporting grain, dimension-key u
 
 **Execution evidence captured (14 November 2026):** selected validation queries were run in SSMS and returned successful results. The observed fact population contained 60,398 rows, sales of 29,356,250, quantity of 60,423, and 27,659 distinct orders. The customer and product reports each returned sales of 29,351,258. Nineteen fact rows had a NULL order date and contributed 4,992 in sales; both reporting view definitions contain the `order_date IS NOT NULL` filter. The resulting mapped dated-sales total therefore reconciles exactly: 29,356,250 - 4,992 = 29,351,258.
 
+**Screenshots:** the original SSMS screenshots are in [docs/images/evidence](docs/images/evidence/) and shown in [Execution Evidence](docs/validation-evidence.md#8-screenshots).
+
+| # | Check | Screenshot |
+|---:|---|---|
+| 01 | Fact-table baseline: 60,398 rows, 29,356,250 sales, 60,423 units, 27,659 orders | [view](docs/images/evidence/01-fact-table-baseline.png) |
+| 02 | Fact rows with no matching customer key: 0 | [view](docs/images/evidence/02-unmatched-customer-keys.png) |
+| 03 | Duplicate product keys in the product dimension: no rows | [view](docs/images/evidence/03-duplicate-product-keys.png) |
+| 04 | Fact rows with no matching product key: 0 | [view](docs/images/evidence/04-unmatched-product-keys.png) |
+| 05 | Product report view preview | [view](docs/images/evidence/05-product-report-preview.png) |
+| 06 | Customer report view preview | [view](docs/images/evidence/06-customer-report-preview.png) |
+| 07 | Fact vs customer report vs product report totals | [view](docs/images/evidence/07-sales-reconciliation.png) |
+| 08 | 19 rows with a NULL order date, carrying 4,992 in sales | [view](docs/images/evidence/08-null-order-date-sales.png) |
+| 09 | `order_date IS NOT NULL` found in both view definitions | [view](docs/images/evidence/09-date-filter-confirmation.png) |
+
+![Sales reconciliation](docs/images/evidence/07-sales-reconciliation.png)
+
 The screenshots also show zero unmatched customer keys, zero unmatched product keys, and no duplicate product keys in the tested queries. These are **selected manual checks**, not proof that every statement in `tests/validate_reporting_views.sql` has been executed. Customer-key duplicate checks, reporting-key grain checks, and the full entity-level `EXCEPT` comparisons still need explicit recorded results before the complete validation suite can be marked passed.
 
 **Database-context note:** the supplied SSMS screenshots show the working database as `Datawarehouse Analytics`, while the committed reporting scripts and validation script currently contain `USE DataWarehouse;`. Confirm that the committed scripts are executed against the intended database (or align the database context consistently) before claiming the screenshots prove an unchanged run of every committed script. No runtime or performance-improvement claims are made.
