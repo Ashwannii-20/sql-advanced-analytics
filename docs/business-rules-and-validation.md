@@ -105,8 +105,29 @@ The validation script reports unmatched fact rows and their sales amounts separa
 - Reconcile the mapped sales population to the relevant report.
 - Record the as-of date used for dynamic recency and age fields.
 
-## 6. Validation status
+## 6. Validation status and observed execution evidence
 
-The checks are committed in [tests/validate_reporting_views.sql](../tests/validate_reporting_views.sql). They have not yet been executed against the target SQL Server instance in this repository workflow.
+Selected manual validation queries were executed successfully in SSMS on 14 November 2026. The observed results are recorded in [Execution Evidence and Reconciliation](validation-evidence.md).
 
-After execution, record the SQL Server version, execution date, returned row counts, reconciliation differences, unmatched-key counts, and accepted exceptions. Do not publish unverified row counts, performance claims, or business findings.
+| Check | Observed result | Status |
+|---|---:|---|
+| Fact rows | 60,398 | Observed |
+| Fact sales | 29,356,250 | Observed |
+| Fact quantity | 60,423 | Observed |
+| Distinct orders | 27,659 | Observed |
+| Unmatched customer keys in tested fact join | 0 | Pass for this query |
+| Unmatched product keys in tested fact join | 0 | Pass for this query |
+| Duplicate product keys | No rows returned | Pass for this query |
+| NULL order-date rows | 19 rows; sales 4,992 | Documented exclusion |
+| Customer report rows | 18,482 | Observed |
+| Product report rows | 130 | Observed |
+| Customer report sales | 29,351,258 | Observed |
+| Product report sales | 29,351,258 | Observed |
+
+Both report definitions contain `order_date IS NOT NULL`. The 4,992 difference between the full fact sales and each report is exactly the sales amount on the 19 rows with a NULL order date. Thus, the totals reconcile for the dated population represented by the two views.
+
+**Scope limitation:** these screenshots establish selected manual checks only. They do not establish that the complete committed validation script has been run. Customer dimension-key duplicates, reporting-view key uniqueness, entity-level metric comparisons, and unexpected-null checks still require explicit result evidence.
+
+**Database-context limitation:** screenshots show SSMS working context `Datawarehouse Analytics`; the committed SQL scripts currently specify `USE DataWarehouse;`. Confirm and standardise this context before describing the screenshots as evidence that the committed scripts ran unchanged.
+
+Do not publish performance claims or claim the full validation suite passed until the remaining checks are executed and recorded.
