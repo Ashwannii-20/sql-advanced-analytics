@@ -64,15 +64,15 @@ The complete metric register and classification thresholds are maintained in [Bu
 
 ## Current status and evidence
 
-The repository contains 13 documented T-SQL scripts and a reporting-view validation script. The SQL has not yet been executed and reconciled against the target SQL Server instance in this repository workflow. Consequently, no execution success, row counts, runtime improvements, or business findings are claimed.
+Selected SQL queries were executed successfully in SSMS on 14 November 2026. The observed fact table contained 60,398 rows, 29,356,250 in sales, 60,423 units, and 27,659 distinct orders. The two report views each returned sales of 29,351,258.
 
-For a technical review, the next evidence to capture is:
+The 4,992 difference is explained by 19 fact rows with NULL order dates. Both reporting view definitions contain `order_date IS NOT NULL`, and 29,356,250 - 4,992 = 29,351,258. The tested unmatched-customer and unmatched-product queries returned zero; the tested duplicate-product-key query returned no rows. See [Execution Evidence and Reconciliation](validation-evidence.md).
 
-1. SQL Server version and execution date.
-2. Successful creation of both reporting views.
-3. Results of duplicate-key and unmatched-dimension checks.
-4. Source-to-report sales and entity-count reconciliations.
-5. Resolution notes for any exceptions.
+This is evidence of selected manual checks, not a claim that every query in the committed validation script has passed. The full test script's remaining result sets still need to be captured.
+
+**Important reproducibility note:** the screenshots show SSMS database context `Datawarehouse Analytics`, while the committed reporting and validation scripts use `USE DataWarehouse;`. Standardise or explicitly document the database context before presenting the screenshots as proof that the committed scripts ran unchanged.
+
+No runtime improvements or production-readiness claims are made.
 
 ## Further development
 
