@@ -3,7 +3,7 @@
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-red)](https://www.microsoft.com/sql-server)
 [![Scripts](https://img.shields.io/badge/SQL%20scripts-13-blue)](#repository-structure)
 [![Focus](https://img.shields.io/badge/Focus-Business%20Analytics-2f6f9f)](#project-overview)
-[![Validation](https://img.shields.io/badge/Validation-Execution%20pending-orange)](#quality-assurance-and-status)
+[![Validation](https://img.shields.io/badge/Validation-Manual%20evidence%20captured-blue)](#quality-assurance-and-status)
 
 A Microsoft SQL Server portfolio project that applies analytical SQL to a dimensional sales model. It progresses from data exploration to time-series analysis, ranking, cumulative metrics, segmentation, and reusable customer and product reporting views.
 
@@ -112,7 +112,11 @@ Metric formulas and assumptions are recorded in [Business Rules and Validation](
 
 The repository includes a validation script for reporting grain, dimension-key uniqueness, unmatched fact keys, source-to-report reconciliation, and entity-level metric comparisons.
 
-**Current status:** the scripts and validation checks are committed, but execution against the target SQL Server instance and review of the resulting reconciliation outputs are still pending. No runtime, row-count, or business-performance claims are made until they are supported by execution evidence.
+**Execution evidence captured (14 November 2026):** selected validation queries were run in SSMS and returned successful results. The observed fact population contained 60,398 rows, sales of 29,356,250, quantity of 60,423, and 27,659 distinct orders. The customer and product reports each returned sales of 29,351,258. Nineteen fact rows had a NULL order date and contributed 4,992 in sales; both reporting view definitions contain the `order_date IS NOT NULL` filter. The resulting mapped dated-sales total therefore reconciles exactly: 29,356,250 - 4,992 = 29,351,258.
+
+The screenshots also show zero unmatched customer keys, zero unmatched product keys, and no duplicate product keys in the tested queries. These are **selected manual checks**, not proof that every statement in `tests/validate_reporting_views.sql` has been executed. Customer-key duplicate checks, reporting-key grain checks, and the full entity-level `EXCEPT` comparisons still need explicit recorded results before the complete validation suite can be marked passed.
+
+**Database-context note:** the supplied SSMS screenshots show the working database as `Datawarehouse Analytics`, while the committed reporting scripts and validation script currently contain `USE DataWarehouse;`. Confirm that the committed scripts are executed against the intended database (or align the database context consistently) before claiming the screenshots prove an unchanged run of every committed script. No runtime or performance-improvement claims are made.
 
 The committed SQL files are curated portfolio versions of the analytical work. Compare them with any local working copies before treating this repository as the canonical execution copy.
 
@@ -122,7 +126,7 @@ The committed SQL files are curated portfolio versions of the analytical work. C
 2. Confirm that `DataWarehouse` contains the three Gold Layer views listed above.
 3. Execute scripts 01–11 in numerical order.
 4. Execute scripts 12 and 13 to create the reporting views.
-5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) and investigate all returned exceptions.
+5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) in the same database that contains the Gold Layer and reporting views; resolve the database-context note in the validation evidence before treating the repository test suite as fully passed.
 
 See [Setup and Execution](docs/setup-and-execution.md) for prerequisites, details, and expected validation behaviour.
 
@@ -150,6 +154,7 @@ See [Setup and Execution](docs/setup-and-execution.md) for prerequisites, detail
 - [Business Rules, Metric Definitions, and Validation](docs/business-rules-and-validation.md)
 - [Project Walkthrough](docs/project-walkthrough.md)
 - [Setup and Execution](docs/setup-and-execution.md)
+- [Execution Evidence and Reconciliation](docs/validation-evidence.md)
 
 ## Learning reference and attribution
 
