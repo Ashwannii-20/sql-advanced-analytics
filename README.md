@@ -140,7 +140,7 @@ The committed SQL files are curated portfolio versions of the analytical work. C
 2. Confirm that `Datawarehouse Analytics` contains the three Gold Layer views listed above.
 3. Execute scripts 01–11 in numerical order.
 4. Execute scripts 12 and 13 to create the reporting views.
-5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) in the same database that contains the Gold Layer and reporting views; resolve the database-context note in the validation evidence before treating the repository test suite as fully passed.
+5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) in the same database.
 
 See [Setup and Execution](docs/setup-and-execution.md) for prerequisites, details, and expected validation behaviour.
 
