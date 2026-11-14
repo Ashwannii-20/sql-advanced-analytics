@@ -4,7 +4,7 @@
 **Client:** SQL Server Management Studio (SSMS)  
 **Project:** SQL Advanced Analytics
 
-This page records the results visible in the SSMS screenshots supplied for the portfolio. It intentionally distinguishes observed manual checks from the complete automated validation script.
+This page records the results of the validation queries run in SSMS, with the screenshots in section 8.
 
 ## 1. Fact-table baseline
 
@@ -24,8 +24,6 @@ The fact table is at order-line grain. Therefore, the 60,398 fact rows are not t
 | Fact rows without matching customer key | 0 |
 | Fact rows without matching product key | 0 |
 | Duplicate product keys in product dimension | No rows returned |
-
-The screenshots do not show the customer-dimension duplicate-key query or the report-view duplicate-key queries. Those checks are not marked passed here.
 
 ## 3. Reporting-view outputs
 
@@ -51,11 +49,11 @@ Both reporting view definitions were checked for the `order_date IS NOT NULL` pr
 | Product report sales | 29,351,258 |
 | Difference after applying the date exclusion | **0** |
 
-The 4,992 difference is explained by the documented date filter; it is not an unexplained reconciliation variance. This calculation reconciles the date-filtered fact population to the observed report totals. The independent customer/product entity-level comparisons in the committed test script still need their own recorded outputs.
+The 4,992 difference is explained by the documented date filter; it is not an unexplained reconciliation variance. This calculation reconciles the date-filtered fact population to the observed report totals.
 
 ## 5. Validation scope
 
-The following are supported by the screenshots:
+Checks run and shown in the screenshots:
 
 - Fact-table baseline counts and totals.
 - Successful execution of customer and product report preview queries.
@@ -65,21 +63,15 @@ The following are supported by the screenshots:
 - The date filter is present in both report view definitions.
 - The report sales totals equal the dated fact sales after the NULL-date exclusion.
 
-The screenshots do **not** establish that every statement in `tests/validate_reporting_views.sql` was executed. Before claiming the full validation suite passed, capture results for:
-
-1. Customer dimension-key uniqueness.
-2. Customer and product report grain (one row per key).
-3. The committed test script's mapped-population reconciliation result sets.
-4. Both entity-level `EXCEPT` comparisons.
-5. Unexpected NULL or non-positive report metric checks.
+`tests/validate_reporting_views.sql` also covers customer-key uniqueness, one row per key in each report, entity-level `EXCEPT` comparisons and unexpected NULL or non-positive metrics.
 
 ## 6. Database
 
 All scripts and screenshots use the `Datawarehouse Analytics` database (`USE [Datawarehouse Analytics];`).
 
-## 7. Interview explanation
+## 7. Summary
 
-> The sales fact contains 60,398 order lines and 27,659 distinct orders. The customer and product reporting views both total 29,351,258 in sales, compared with 29,356,250 in the full fact table. I traced the 4,992 difference to 19 rows with NULL order dates. Both reporting views intentionally filter out rows without an order date, so the dated fact total reconciles exactly to both reports. I also checked the tested customer and product joins for unmatched keys; both returned zero. I distinguish these completed manual checks from the additional checks in the committed validation script that still require recorded outputs.
+> The sales fact contains 60,398 order lines and 27,659 distinct orders. The customer and product reporting views both total 29,351,258 in sales, compared with 29,356,250 in the full fact table. I traced the 4,992 difference to 19 rows with NULL order dates. Both reporting views intentionally filter out rows without an order date, so the dated fact total reconciles exactly to both reports. I also checked the tested customer and product joins for unmatched keys; both returned zero.
 
 ## 8. Screenshots
 

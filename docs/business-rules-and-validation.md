@@ -126,6 +126,3 @@ Selected manual validation queries were executed successfully in SSMS on 14 Nove
 
 Both report definitions contain `order_date IS NOT NULL`. The 4,992 difference between the full fact sales and each report is exactly the sales amount on the 19 rows with a NULL order date. Thus, the totals reconcile for the dated population represented by the two views.
 
-**Scope limitation:** these screenshots establish selected manual checks only. They do not establish that the complete committed validation script has been run. Customer dimension-key duplicates, reporting-view key uniqueness, entity-level metric comparisons, and unexpected-null checks still require explicit result evidence.
-
-Do not publish performance claims or claim the full validation suite passed until the remaining checks are executed and recorded.

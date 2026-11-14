@@ -77,4 +77,3 @@ The observed manual results and reconciliation are documented in [Execution Evid
 - The inclusive calendar-month span is DATEDIFF(MONTH, first_date, last_date) + 1; it is not a count of months with purchases.
 - Age and month-boundary recency use GETDATE() and therefore change over time.
 - Customer and product thresholds are illustrative assumptions for this portfolio project.
-- The committed SQL files are curated portfolio versions. Compare them with any local working copies before treating this repository as the canonical execution copy.

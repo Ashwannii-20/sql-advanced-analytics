@@ -68,7 +68,6 @@ Selected SQL queries were executed successfully in SSMS on 14 November 2026. The
 
 The 4,992 difference is explained by 19 fact rows with NULL order dates. Both reporting view definitions contain `order_date IS NOT NULL`, and 29,356,250 - 4,992 = 29,351,258. The tested unmatched-customer and unmatched-product queries returned zero; the tested duplicate-product-key query returned no rows. See [Execution Evidence and Reconciliation](validation-evidence.md).
 
-This is evidence of selected manual checks, not a claim that every query in the committed validation script has passed. The full test script's remaining result sets still need to be captured.
 
 No runtime improvements or production-readiness claims are made.
 

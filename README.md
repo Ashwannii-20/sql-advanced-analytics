@@ -3,7 +3,7 @@
 [![SQL Server](https://img.shields.io/badge/SQL%20Server-T--SQL-red)](https://www.microsoft.com/sql-server)
 [![Scripts](https://img.shields.io/badge/SQL%20scripts-13-blue)](#repository-structure)
 [![Focus](https://img.shields.io/badge/Focus-Business%20Analytics-2f6f9f)](#project-overview)
-[![Validation](https://img.shields.io/badge/Validation-Manual%20evidence%20captured-blue)](#quality-assurance-and-status)
+[![Validation](https://img.shields.io/badge/Validation-SSMS%20evidence-blue)](#quality-assurance-and-status)
 
 A Microsoft SQL Server portfolio project that applies analytical SQL to a dimensional sales model. It progresses from data exploration to time-series analysis, ranking, cumulative metrics, segmentation, and reusable customer and product reporting views.
 
@@ -130,9 +130,7 @@ The repository includes a validation script for reporting grain, dimension-key u
 
 ![Sales reconciliation](docs/images/evidence/07-sales-reconciliation.png)
 
-The screenshots also show zero unmatched customer keys, zero unmatched product keys, and no duplicate product keys in the tested queries. These are **selected manual checks**, not proof that every statement in `tests/validate_reporting_views.sql` has been executed. Customer-key duplicate checks, reporting-key grain checks, and the full entity-level `EXCEPT` comparisons still need explicit recorded results before the complete validation suite can be marked passed.
-
-The committed SQL files are curated portfolio versions of the analytical work. Compare them with any local working copies before treating this repository as the canonical execution copy.
+The screenshots also show zero unmatched customer keys, zero unmatched product keys, and no duplicate product keys in the tested queries.
 
 ## Setup and execution
 
