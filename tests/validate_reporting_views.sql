@@ -11,7 +11,7 @@
     dimension keys; do not assume they are harmless.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Customer dimension keys should be unique.

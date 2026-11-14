@@ -5,7 +5,7 @@
               across useful business dimensions.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Revenue by product category.

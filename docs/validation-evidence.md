@@ -73,11 +73,9 @@ The screenshots do **not** establish that every statement in `tests/validate_rep
 4. Both entity-level `EXCEPT` comparisons.
 5. Unexpected NULL or non-positive report metric checks.
 
-## 6. Database-context reproducibility
+## 6. Database
 
-The supplied SSMS screenshots show the working database selector as `Datawarehouse Analytics`. The committed reporting scripts and validation script currently contain `USE DataWarehouse;`.
-
-Before presenting this repository as a reproducible run of the committed scripts, confirm which database is the canonical execution target and align the scripts, README prerequisites, and screenshot evidence. Do not silently treat the two database names as interchangeable.
+All scripts and screenshots use the `Datawarehouse Analytics` database (`USE [Datawarehouse Analytics];`).
 
 ## 7. Interview explanation
 

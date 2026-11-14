@@ -12,7 +12,7 @@
     that product. A zero prior-year denominator produces a NULL percentage.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 WITH yearly_product_sales AS

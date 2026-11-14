@@ -11,4 +11,4 @@ Run these read-only scripts first to understand the Gold Layer before drawing co
 | 05 | Magnitude analysis | Revenue, customer and product comparisons by dimension |
 | 06 | Ranking analysis | Top/bottom products, subcategories and customers |
 
-All scripts use T-SQL and the `DataWarehouse` database. They query the existing Gold Layer views and do not modify source data.
+All scripts use T-SQL and the `Datawarehouse Analytics` database. They query the existing Gold Layer views and do not modify source data.

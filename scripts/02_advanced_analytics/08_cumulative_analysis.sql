@@ -11,7 +11,7 @@
     is calculated across observed months, not a calendar-complete series.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 WITH monthly_sales AS

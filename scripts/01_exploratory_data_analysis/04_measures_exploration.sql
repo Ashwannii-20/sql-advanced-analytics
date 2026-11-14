@@ -5,7 +5,7 @@
               or trend analysis.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Core sales measures.

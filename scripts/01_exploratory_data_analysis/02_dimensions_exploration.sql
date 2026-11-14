@@ -7,7 +7,7 @@
     labels, missing values, and the dimensions available for grouping.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Customer geography.

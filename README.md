@@ -15,7 +15,7 @@ The emphasis is on **business meaning, correct aggregation grain, explicit metri
 |---|---|
 | Database platform | Microsoft SQL Server |
 | Language | T-SQL |
-| Source database | `DataWarehouse` |
+| Source database | `Datawarehouse Analytics` |
 | Source objects | `gold.fact_sales`, `gold.dim_customers`, `gold.dim_products` |
 | Analytical scope | 12 topics across 13 SQL scripts |
 | Reporting outputs | `gold.report_customers`, `gold.report_products` |
@@ -132,14 +132,12 @@ The repository includes a validation script for reporting grain, dimension-key u
 
 The screenshots also show zero unmatched customer keys, zero unmatched product keys, and no duplicate product keys in the tested queries. These are **selected manual checks**, not proof that every statement in `tests/validate_reporting_views.sql` has been executed. Customer-key duplicate checks, reporting-key grain checks, and the full entity-level `EXCEPT` comparisons still need explicit recorded results before the complete validation suite can be marked passed.
 
-**Database-context note:** the supplied SSMS screenshots show the working database as `Datawarehouse Analytics`, while the committed reporting scripts and validation script currently contain `USE DataWarehouse;`. Confirm that the committed scripts are executed against the intended database (or align the database context consistently) before claiming the screenshots prove an unchanged run of every committed script. No runtime or performance-improvement claims are made.
-
 The committed SQL files are curated portfolio versions of the analytical work. Compare them with any local working copies before treating this repository as the canonical execution copy.
 
 ## Setup and execution
 
 1. Build or restore the upstream [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project).
-2. Confirm that `DataWarehouse` contains the three Gold Layer views listed above.
+2. Confirm that `Datawarehouse Analytics` contains the three Gold Layer views listed above.
 3. Execute scripts 01–11 in numerical order.
 4. Execute scripts 12 and 13 to create the reporting views.
 5. Run [tests/validate_reporting_views.sql](tests/validate_reporting_views.sql) in the same database that contains the Gold Layer and reporting views; resolve the database-context note in the validation evidence before treating the repository test suite as fully passed.

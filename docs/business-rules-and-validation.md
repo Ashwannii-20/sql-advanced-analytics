@@ -128,6 +128,4 @@ Both report definitions contain `order_date IS NOT NULL`. The 4,992 difference b
 
 **Scope limitation:** these screenshots establish selected manual checks only. They do not establish that the complete committed validation script has been run. Customer dimension-key duplicates, reporting-view key uniqueness, entity-level metric comparisons, and unexpected-null checks still require explicit result evidence.
 
-**Database-context limitation:** screenshots show SSMS working context `Datawarehouse Analytics`; the committed SQL scripts currently specify `USE DataWarehouse;`. Confirm and standardise this context before describing the screenshots as evidence that the committed scripts ran unchanged.
-
 Do not publish performance claims or claim the full validation suite passed until the remaining checks are executed and recorded.

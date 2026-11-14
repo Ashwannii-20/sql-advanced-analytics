@@ -4,7 +4,7 @@
 
 - Microsoft SQL Server and SQL Server Management Studio (SSMS), or a compatible T-SQL client.
 - The related [SQL Data Warehouse Project](https://github.com/Ashwannii-20/SQL-Data-Warehouse-Project) built or restored.
-- A database containing these Gold Layer views (the committed scripts currently select `DataWarehouse`):
+- A database containing these Gold Layer views (the scripts select `Datawarehouse Analytics`):
   - gold.fact_sales
   - gold.dim_customers
   - gold.dim_products
@@ -65,7 +65,7 @@ Review each result set:
 
 A query completing without a SQL error is not proof that its business logic is correct. Record the SQL Server version, execution date, result counts, reconciliation outputs, and accepted exceptions.
 
-**Execution evidence note:** the manual SSMS screenshots supplied for this portfolio show the working database context as `Datawarehouse Analytics`, while scripts 12, 13, and the validation script contain `USE DataWarehouse;`. Confirm that both names refer to the intended working environment and align the context before running the committed scripts as a reproducible end-to-end workflow. The observed manual results and reconciliation are documented in [Execution Evidence and Reconciliation](validation-evidence.md).
+The observed manual results and reconciliation are documented in [Execution Evidence and Reconciliation](validation-evidence.md).
 
 ## Important implementation notes
 

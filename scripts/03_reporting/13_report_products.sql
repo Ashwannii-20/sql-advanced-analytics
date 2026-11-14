@@ -18,7 +18,7 @@
     must also be reported; define historical-product coverage separately.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 CREATE OR ALTER VIEW gold.report_products

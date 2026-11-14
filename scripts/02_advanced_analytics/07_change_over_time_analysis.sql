@@ -5,7 +5,7 @@
               orders, and active customers.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Monthly sales trend.

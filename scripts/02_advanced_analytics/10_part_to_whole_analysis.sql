@@ -8,7 +8,7 @@
     reporting or presentation layer.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 WITH category_sales AS

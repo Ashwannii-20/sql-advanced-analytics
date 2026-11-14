@@ -7,7 +7,7 @@
     The age expression below adjusts for whether the birthday has occurred.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Sales date coverage and missing order dates.

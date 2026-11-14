@@ -17,7 +17,7 @@
     snapshot is required.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 CREATE OR ALTER VIEW gold.report_customers

@@ -5,7 +5,7 @@
               and customers.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Top five products by revenue.

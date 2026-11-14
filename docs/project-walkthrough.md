@@ -70,8 +70,6 @@ The 4,992 difference is explained by 19 fact rows with NULL order dates. Both re
 
 This is evidence of selected manual checks, not a claim that every query in the committed validation script has passed. The full test script's remaining result sets still need to be captured.
 
-**Important reproducibility note:** the screenshots show SSMS database context `Datawarehouse Analytics`, while the committed reporting and validation scripts use `USE DataWarehouse;`. Standardise or explicitly document the database context before presenting the screenshots as proof that the committed scripts ran unchanged.
-
 No runtime improvements or production-readiness claims are made.
 
 ## Further development

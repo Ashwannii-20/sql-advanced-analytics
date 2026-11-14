@@ -1,13 +1,13 @@
 /*
     Project : SQL Advanced Analytics
     Script  : 01 - Database Exploration
-    Database: DataWarehouse
+    Database: Datawarehouse Analytics
     Purpose : Inspect the Gold Layer objects and their column definitions.
 
     Run this script first. It is read-only and does not modify database objects.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Confirm the current database.

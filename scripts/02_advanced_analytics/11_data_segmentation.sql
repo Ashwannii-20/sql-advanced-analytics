@@ -11,7 +11,7 @@
     The 'New' label is the residual segment, not proof of recent acquisition.
 */
 
-USE DataWarehouse;
+USE [Datawarehouse Analytics];
 GO
 
 -- 1. Product segmentation by cost.
