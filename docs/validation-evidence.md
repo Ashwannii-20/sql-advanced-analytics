@@ -1,0 +1,88 @@
+# Execution Evidence and Reconciliation
+
+**Evidence date:** 14 November 2026  
+**Client:** SQL Server Management Studio (SSMS)  
+**Project:** SQL Advanced Analytics
+
+This page records the results visible in the SSMS screenshots supplied for the portfolio. It intentionally distinguishes observed manual checks from the complete automated validation script.
+
+## 1. Fact-table baseline
+
+| Measure | Observed result |
+|---|---:|
+| Fact rows | 60,398 |
+| Total sales | 29,356,250 |
+| Total quantity | 60,423 |
+| Distinct order numbers | 27,659 |
+
+The fact table is at order-line grain. Therefore, the 60,398 fact rows are not the same measure as the 27,659 distinct orders.
+
+## 2. Referential and key checks
+
+| Check | Observed result |
+|---|---:|
+| Fact rows without matching customer key | 0 |
+| Fact rows without matching product key | 0 |
+| Duplicate product keys in product dimension | No rows returned |
+
+The screenshots do not show the customer-dimension duplicate-key query or the report-view duplicate-key queries. Those checks are not marked passed here.
+
+## 3. Reporting-view outputs
+
+| Report | Rows returned | Sales total |
+|---|---:|---:|
+| Customer report | 18,482 | 29,351,258 |
+| Product report | 130 | 29,351,258 |
+
+Both report previews returned rows successfully. The screenshots show the views `gold.report_customers` and `gold.report_products` in the SSMS Object Explorer.
+
+## 4. Sales reconciliation
+
+The full fact table total is 29,356,250. A separate query found 19 fact rows with a NULL `order_date`, carrying sales of 4,992.
+
+Both reporting view definitions were checked for the `order_date IS NOT NULL` predicate, and the predicate was found in both.
+
+| Reconciliation step | Sales |
+|---|---:|
+| Full fact-table sales | 29,356,250 |
+| Less sales on 19 rows with NULL order date | (4,992) |
+| Dated sales represented by the report filters | **29,351,258** |
+| Customer report sales | 29,351,258 |
+| Product report sales | 29,351,258 |
+| Difference after applying the date exclusion | **0** |
+
+The 4,992 difference is explained by the documented date filter; it is not an unexplained reconciliation variance. This calculation reconciles the date-filtered fact population to the observed report totals. The independent customer/product entity-level comparisons in the committed test script still need their own recorded outputs.
+
+## 5. Validation scope
+
+The following are supported by the screenshots:
+
+- Fact-table baseline counts and totals.
+- Successful execution of customer and product report preview queries.
+- Zero unmatched customer and product keys in the tested joins.
+- No duplicate product keys returned by the tested query.
+- Nineteen NULL-order-date fact rows carrying 4,992 in sales.
+- The date filter is present in both report view definitions.
+- The report sales totals equal the dated fact sales after the NULL-date exclusion.
+
+The screenshots do **not** establish that every statement in `tests/validate_reporting_views.sql` was executed. Before claiming the full validation suite passed, capture results for:
+
+1. Customer dimension-key uniqueness.
+2. Customer and product report grain (one row per key).
+3. The committed test script's mapped-population reconciliation result sets.
+4. Both entity-level `EXCEPT` comparisons.
+5. Unexpected NULL or non-positive report metric checks.
+
+## 6. Database-context reproducibility
+
+The supplied SSMS screenshots show the working database selector as `Datawarehouse Analytics`. The committed reporting scripts and validation script currently contain `USE DataWarehouse;`.
+
+Before presenting this repository as a reproducible run of the committed scripts, confirm which database is the canonical execution target and align the scripts, README prerequisites, and screenshot evidence. Do not silently treat the two database names as interchangeable.
+
+## 7. Interview explanation
+
+> The sales fact contains 60,398 order lines and 27,659 distinct orders. The customer and product reporting views both total 29,351,258 in sales, compared with 29,356,250 in the full fact table. I traced the 4,992 difference to 19 rows with NULL order dates. Both reporting views intentionally filter out rows without an order date, so the dated fact total reconciles exactly to both reports. I also checked the tested customer and product joins for unmatched keys; both returned zero. I distinguish these completed manual checks from the additional checks in the committed validation script that still require recorded outputs.
+
+## 8. Evidence handling
+
+SSMS screenshots were supplied in the project review conversation. This document records their visible results. The screenshots have not been committed as image files in this repository; add the original image files under `docs/images/` and embed them here if a visual evidence gallery is required.
